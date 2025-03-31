@@ -15,7 +15,7 @@ EVENTS = "events.json"
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
-    restricted = ["/main", "/calendar", "/profile", "/settings", "/questionnaire"]
+    restricted = ["/main", "/calendar", "/profile", "/settings", "/questionnaire", "/logout"]
     if request.path in restricted and "user" not in session:
         return redirect(url_for("start"))
 
@@ -32,6 +32,11 @@ def previous_url():
 def start():
     '''registration page'''
     return render_template('start.html')
+
+@app.route("/logout")
+def logout_page():
+    '''logout page'''
+    return render_template("logout.html")
 
 @app.route("/main")
 def main():
@@ -85,15 +90,15 @@ def login():
 
 @app.route("/approving-psychologist")
 def ps_approving():
-    '''after signing up page (for psychologists)'''
+    '''after signing up page'''
     return render_template("ps-approving.html")
 
 @app.route("/approving-event")
 def v_approving():
-    '''after sending event page (for volunteers)'''
+    '''after sending event page'''
     return render_template('v-approving.html')
 
-
+#sing up/in
 
 @app.route("/validation", methods=["POST"])
 def validate_user():
@@ -165,7 +170,12 @@ def write_to_json(key, info, filename):
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
+@app.route("/complete-logout")
+def logout():
+    '''logout function'''
+    session.pop("user",None)
+    session.clear()
+    return redirect(url_for("start"))
+
 if __name__ == "__main__":
     app.run(debug=True)
-    #add logout
-    #manually add person
