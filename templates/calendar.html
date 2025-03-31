@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+    <a href="{{ url_for('main') }}">
+        <button> << </button>
+    </a>
+    <h1> Календар ;pp</h1>
+    <br>
+    {% if occupation != "military" %}
+        <button> додати подію </button>
+    {% endif %}
+</html>

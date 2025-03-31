@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    {% if occupation == "military" or occupation == "admin" %}
+        <a href="{{ url_for('questions') }}">
+            <button> Опитувальник </button>
+        </a>
+    {% endif %}
+    <a href="{{ url_for('calendar') }}">
+        <button> Календар </button>
+    </a>
+    <a href="{{ url_for('profile') }}">
+        <button> Профіль </button>
+    </a>
+    <a href="{{ url_for('settings') }}">
+        <button> Настройки </button>
+    </a>
+    <h1>BEYOND DUTY</h1>
+</html>

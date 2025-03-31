@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <a href="{{ url_for('start') }}">
+        <button> << </button>
+    </a>
+    <a href = "{{ url_for('login') }}">
+        <button>i have an account already</button>
+    </a>
+    <br>
+    <form action="{{ url_for('save_data') }}", method="POST">
+
+        <input type="hidden" id="occupation" name="occupation" value="volunteer">
+        <br>
+        <label for="event-name"> Назва події </label>
+        <br>
+        <input type="text" id="event-namee" name="event-name" placeholder="..." required>
+        <br>
+        <label for="description"> Опис події </label>
+        <br>
+        <input type="text" id="description" name="description" placeholder="..." required>
+        <br>
+        <label for="email"> Enter your email </label>
+        <br>
+        <input type="text" id="email" name="email" placeholder="..." required>
+        <br>
+        <label for="number"> Enter your number </label>
+        <br>
+        <input type="text" id="number" name="number" placeholder="+380 XX XXX XXXX" required>
+
+        <br>
+        <br>
+        
+        <button>submit</button>
+    </form>
+    {% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
+</html>

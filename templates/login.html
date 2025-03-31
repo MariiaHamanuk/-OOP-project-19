@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <a href="{{ url_for('start') }}">
+        <button> << </button>
+    </a>
+    <a href="{{ session.get('prev_url', url_for('start')) }}">
+        <button>I don't have an account</button>
+    </a>
+    <br>
+    <form action="{{ url_for('validate_user') }}", method="POST">
+        <label for="name"> Enter your username </label>
+        <br>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password"> Enter your password </label>
+        <br>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button>submit</button>
+        <br>
+    </form>
+    {% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
+</html>
