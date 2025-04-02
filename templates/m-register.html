@@ -7,11 +7,15 @@
         <button>i have an account already</button>
     </a>
     <br>
-    <form action="{{ url_for('save_data') }}", method="POST">
+    <form action="{{ url_for('save_user') }}", method="POST">
         <input type="hidden" id="occupation" name="occupation" value="military">
         <label for="username"> Enter your username </label>
         <br>
         <input type="text" id="username" name="username" required>
+        <br>
+        <label for="email"> Enter your email </label>
+        <br>
+        <input type="text" id="email" name="email" placeholder="..." required>
         <br>
         <label for="password"> Enter your password </label>
         <br>

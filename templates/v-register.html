@@ -7,17 +7,25 @@
         <button>i have an account already</button>
     </a>
     <br>
-    <form action="{{ url_for('save_data') }}", method="POST">
+    <form action="{{ url_for('save_user') }}", method="POST">
 
         <input type="hidden" id="occupation" name="occupation" value="volunteer">
         <br>
-        <label for="event-name"> Назва події </label>
+        <label for="username"> Enter your username </label>
         <br>
-        <input type="text" id="event-namee" name="event-name" placeholder="..." required>
+        <input type="text" id="username" name="username" placeholder="..." required>
         <br>
-        <label for="description"> Опис події </label>
+        <label for="name"> Введіть ваше ім'я </label>
         <br>
-        <input type="text" id="description" name="description" placeholder="..." required>
+        <input type="text" id="name" name="name" placeholder="..." required>
+        <br>
+        <label for="surname"> Введіть ваше прізвище </label>
+        <br>
+        <input type="text" id="surname" name="surname" placeholder="..." required>
+        <br>
+        <label for="bio"> Розкажіть про ваш волонтерський довсвід </label>
+        <br>
+        <input type="text" id="bio" name="bio" placeholder="..." required>
         <br>
         <label for="email"> Enter your email </label>
         <br>
@@ -25,7 +33,11 @@
         <br>
         <label for="number"> Enter your number </label>
         <br>
-        <input type="text" id="number" name="number" placeholder="+380 XX XXX XXXX" required>
+        <input type="text" id="number" name="number" placeholder="+380 XX XXX XXXX">
+        <br>
+        <label for="password"> Enter your password </label>
+        <br>
+        <input type="password" id="password" name="password" placeholder="..." required>
 
         <br>
         <br>
