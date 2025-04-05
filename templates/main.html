@@ -17,5 +17,16 @@
     <a href="{{ url_for('logout_page') }}">
         <button> Вийти </button>
     </a>
+
     <h1>BEYOND DUTY</h1>
+    <h3>Топ психологів</h3>
+
+    {% if top %}
+        {% for p in top %}
+            <li>{{ "{}. {}".format(loop.index,p.name) }}</li>
+        {% endfor %}
+    {% else %}
+        <h5>Пусто</h5>
+    {% endif %}
+
 </html>

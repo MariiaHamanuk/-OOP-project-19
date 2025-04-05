@@ -1,5 +1,4 @@
 '''back-end'''
-import json
 import re
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
@@ -16,32 +15,41 @@ db = SQLAlchemy(app)
 
 
 
-class User(db.Model):
+class Users(db.Model):
     '''Users table'''
     id = db.Column(db.Integer, primary_key=True)
     occupation = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(320), unique=True, nullable=False)
-    number = db.Column(db.String(320), unique=True)
-    name = db.Column(db.String(50), nullable=True)
-    surname = db.Column(db.String(50), nullable=True)
-    bio = db.Column(db.String(500))
     password = db.Column(db.Text, nullable=False)
+
+    number = db.Column(db.String(320), unique=True)
+    name = db.Column(db.String(50))
+    surname = db.Column(db.String(50))
+    bio = db.Column(db.String(500))
     verified = db.Column(db.Boolean)
 
-    def __init__(self, occupation, username, email, number, name, surname, bio, password, verified):
+    picture = db.Column(db.Text)
+    rating = db.Column(db.Float)
+
+    def __init__(self, occupation, username, email, number, name, \
+surname, bio, password, verified=True, rating=None):
         '''for positional arguments'''
         self.occupation = occupation
         self.username = username
         self.email = email
+
         self.number = number
         self.name = name
         self.surname = surname
         self.bio = bio
+
         self.password = password #add hashing
         self.verified = verified
 
-class Event(db.Model):
+        self.rating = rating
+
+class Events(db.Model):
     '''Event table'''
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
@@ -87,14 +95,15 @@ def logout_page():
 @app.route("/main")
 def main():
     '''main page'''
-    user = User.query.filter_by(username=session['user']).first()
+    user = Users.query.filter_by(username=session['user']).first()
     occupation = user.occupation
-    return render_template("main.html", occupation=occupation)
+    top = top_psychologists()
+    return render_template("main.html", occupation=occupation, top=top)
 
 @app.route("/calendar")
 def calendar():
     '''calendar page'''
-    user = User.query.filter_by(username=session['user']).first()
+    user = Users.query.filter_by(username=session['user']).first()
     occupation = user.occupation
     return render_template("calendar.html", occupation=occupation)
 
@@ -152,7 +161,7 @@ def validate_user():
     username = request.form["username"]
     password = request.form["password"]
 
-    user = User.query.filter_by(username=username).first()
+    user = Users.query.filter_by(username=username).first()
 
     if not user:
         return render_template('login.html', error_message="No account with this username")
@@ -182,10 +191,10 @@ def save_user():
 if request.form.get("number") else None
 
     if occupation == 'military':
-        user = User(occupation, username, email, number, name, surname, bio, password, True)
+        user = Users(occupation, username, email, number, name, surname, bio, password, True)
 
     else:
-        user = User(occupation, username, email, number, name, surname, bio, password, False)
+        user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
 
     if not used(username):
         add_to_db(user)
@@ -196,7 +205,7 @@ if request.form.get("number") else None
         case 'military':
             page = "m-register.html"
         case "psychologist":
-            page = "ps-register.htmlr"
+            page = "ps-register.html"
         case "volunteer":
             page = "v-register.html"
 
@@ -204,7 +213,7 @@ if request.form.get("number") else None
 
 def used(username):
     '''checks if name is already in use'''
-    return User.query.filter_by(username=username).first()
+    return Users.query.filter_by(username=username).first()
 
 def add_to_db(data):
     '''writes data to the database'''
@@ -219,8 +228,18 @@ def logout():
     return redirect(url_for("start"))
 
 def create_tables():
+    '''creates tables if not created'''
     with app.app_context():
         db.create_all()
+
+def top_psychologists():
+    '''sort psycholists by rating'''
+    psychologists = Users.query.filter_by(occupation="psychologist").all()
+    if psychologists:
+        return sorted(sorted(psychologists, key=lambda p: p.username),\
+key=lambda p: p.rating, reverse=True)[:3]
+
+
 
 if __name__ == "__main__":
     create_tables()
