@@ -2,6 +2,7 @@
 import re
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from authlib.integrations.flask_client import OAuth
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -12,9 +13,57 @@ app.secret_key = "very_secure123"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:very_secure321@localhost:5432/base'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+#oauth
+oauth = OAuth(app)
 
+google = oauth.register(
+    name='google',
+    client_id='ВАШ_GOOGLE_CLIENT_ID',
+    client_secret='ВАШ_GOOGLE_CLIENT_SECRET',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params={
+        'access_type': 'offline',
+        'prompt': 'consent'
+    },
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
+    client_kwargs={'scope': 'openid email profile'}
+)
 
+@app.route('/login/google')
+def google_login():
+    redirect_uri = url_for('google_auth', _external=True)
+    return google.authorize_redirect(redirect_uri)
 
+@app.route('/auth/google')
+def google_auth():
+    token = google.authorize_access_token()
+    user_info = google.get('userinfo').json()
+    email = user_info['email']
+    username = user_info.get('name', email.split('@')[0])
+
+    user = Users.query.filter_by(email=email).first()
+    if not user:
+
+        user = Users(
+            occupation='volunteer',
+            username=username,
+            email=email,
+            number=None,
+            name=user_info.get('given_name'),
+            surname=user_info.get('family_name'),
+            bio='',
+            password='oauth',
+            verified=True,
+            rating=0.0
+        )
+        add_to_db(user)
+
+    session['user'] = user.username
+    return redirect(url_for('main'))
+#oauth
 class Users(db.Model):
     '''Users table'''
     id = db.Column(db.Integer, primary_key=True)
@@ -195,12 +244,13 @@ if request.form.get("number") else None
 
     else:
         user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
-
+    # regex 
+    # if 
     if not used(username):
         add_to_db(user)
         session["user"] = username
         return redirect(url_for("main"))
-
+    #regex
     match occupation:
         case 'military':
             page = "m-register.html"
