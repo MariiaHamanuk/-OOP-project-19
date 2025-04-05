@@ -1,34 +1,9 @@
-<!-- <!DOCTYPE html>
-<html>
-    <a href="{{ url_for('start') }}">
-        <button> << </button>
-    </a>
-    <a href="{{ session.get('prev_url', url_for('start')) }}">
-        <button>I don't have an account</button>
-    </a>
-    <br>
-    <form action="{{ url_for('validate_user') }}", method="POST">
-        <label for="name"> Enter your username </label>
-        <br>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password"> Enter your password </label>
-        <br>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <button>submit</button>
-        <br>
-    </form>
-    {% if error_message %}
-    <p style="color: red;">{{ error_message }}</p>
-    {% endif %}
-</html> -->
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>log in</title>
+    <title>volunteer sign up</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,23 +55,6 @@
             top: 180px;
             left: 935px;
         }
-        /* .switch {
-            display: flex;
-            justify-content: right;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .switch button {
-            background: #6ec6c4;
-            color: white;
-            border: none;
-            padding: 15px 74px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-        .switch button:hover {
-            background: #4b9391; */
-        /* } */
         form {
             display: flex;
             flex-direction: column;
@@ -109,30 +67,7 @@
             border: 1px solid #6ec6c4;
             border-radius: 15px;
         }
-        .password-wrapper {
-            position: right;
-            width: 10%;
-        }
-        .password-wrapper input {
-            width: 10%;
-            padding-right: 40px;
-        }
-        .password-wrapper img {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            cursor: pointer;
-        }
-        .options {
-            display: flex;
-            justify-content: space-between;
-            width: 30%;
-            font-size: 14px;
-        }
         .login-button {
-            /* width: 30%; */
             background: #6ec6c4;
             color: white;
             border: none;
@@ -144,56 +79,47 @@
         .login-button:hover {
             background: #4b9391;
         }
-
         .toggle-container {
-        display: flex;
-        position: absolute;
-        top: 240px;
-        left: 845px;
-        align-items: flex-end;
-        margin-bottom: 20px;
+            display: flex;
+            position: absolute;
+            top: 240px;
+            left: 845px;
+            align-items: flex-end;
+            margin-bottom: 20px;
         }
-
         .switch-input {
-        display: none;
+            display: none;
         }
-
         .switch-label {
-        padding: 7px 17px;
-        background-color: #6ec6c4;
-        border-radius: 30px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+            padding: 7px 17px;
+            background-color: #6ec6c4;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-
-        /* Ліва частина (темніша при вибраному стані) */
         .switch-input:checked + .switch-label .left_sw {
-        background-color: #6ec6c4;
-        color: black;
-        pointer-events: auto;
+            background-color: #6ec6c4;
+            color: black;
+            pointer-events: auto;
         }
-
         .switch-input:checked + .switch-label .right_sw {
-        background-color: #4b9391;
-        color: white;
-        pointer-events: none;
+            background-color: #4b9391;
+            color: white;
+            pointer-events: none;
         }
-
         .left_sw, .right_sw {
-        display: inline-block;
-        padding: 4px 20px;
-        border-radius: 30px;
-        transition: all 0.3s ease;
+            display: inline-block;
+            padding: 4px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
         }
-
         .left_sw {
-        background-color: #4b9391;
-        color: white;
+            background-color: #4b9391;
+            color: white;
         }
-
         .right_sw {
-        background-color: #6ec6c4;
-        color: rgb(0, 0, 0);
+            background-color: #6ec6c4;
+            color: rgb(0, 0, 0);
         }
     </style>
 </head>
@@ -210,8 +136,10 @@
             </div>
             <form action="/register" method="POST">
                 <input type="text" name="username" placeholder="Ваше ім'я" required>
-                <input type="password" name="password" placeholder="Пароль" required>
-                <button class="login-button" type="submit">Login</button>
+                <input type="email" name="email" placeholder="Ваш номер" required>
+                <input type="text" name="event_description" placeholder="Опис події" required>
+                <input type="text" name="event_cover_link" placeholder="Посилання на обкладинку події *не обов'язково*" required>
+                <button class="login-button" type="submit">Надіслати</button>
                 <div class="toggle-container">
                     <input type="checkbox" id="account-toggle" class="switch-input">
                     <label for="account-toggle" class="switch-label">
