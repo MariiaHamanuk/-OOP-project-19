@@ -210,18 +210,103 @@ def validate_user():
 
     return render_template("login.html", error_message="Wrong password")
 
+#all of the regex functions
+def validate_name(name):
+    ''' complitad regex for username min. 3 char and max. 30, special
+    characters can be allowed, if all characters are only special 
+    characters it should return false'''
+    regex = "^(?=.*[A-Za-z0-9]).{3,30}$"
+    return re.fullmatch(regex, name) is not None
+
+def validate_email(email):
+    '''regex for email'''
+    regex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    return re.fullmatch(regex, email) is not None
+
+def validate_password(password):
+    '''Minimum eight and maximum 10 characters, at least one
+    uppercase letter, one lowercase letter, one number and one special character:'''
+    regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$"
+    return re.fullmatch(regex, password) is not None
+
+def validate_number(number):
+    '''must be checked '''
+    regex = "^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$"
+    return re.fullmatch(regex, number) is not None
+#all of the regex functions
+
+
 @app.route("/save", methods=["POST"])
 def save_user():
     '''saves user to file'''
     occupation = request.form["occupation"]
 
     username = request.form["username"]
+
+    if not validate_name(username):
+        match occupation:
+            case 'military':
+                page = "m-register.html"
+            case "psychologist":
+                page = "ps-register.html"
+            case "volunteer":
+                page = "v-register.html"
+        return render_template(page, error_message="Invalid username")
+
     email = request.form["email"]
+
+    if not validate_email(email):
+        match occupation:
+            case 'military':
+                page = "m-register.html"
+            case "psychologist":
+                page = "ps-register.html"
+            case "volunteer":
+                page = "v-register.html"
+        return render_template(page, error_message="Invalid email format")
+
     password = request.form["password"]
+    if not validate_password(password):
+        match occupation:
+            case 'military':
+                page = "m-register.html"
+            case "psychologist":
+                page = "ps-register.html"
+            case "volunteer":
+                page = "v-register.html"
+        return render_template(page, error_message="Invalid password format")
 
     name = request.form.get("name")
+    if not re.fullmatch('^.{1,30}$', name):
+        match occupation:
+            case 'military':
+                page = "m-register.html"
+            case "psychologist":
+                page = "ps-register.html"
+            case "volunteer":
+                page = "v-register.html"
+        return render_template(page, error_message="Invalid name must be between ")
+
     surname = request.form.get("surname")
+    if not re.fullmatch('^.{1,30}$', surname):
+        match occupation:
+            case 'military':
+                page = "m-register.html"
+            case "psychologist":
+                page = "ps-register.html"
+            case "volunteer":
+                page = "v-register.html"
+        return render_template(page, error_message="Invalid surname must be between ")
     bio = request.form.get("bio")
+    if not re.fullmatch('^.{1,300}$', bio):
+        match occupation:
+            case 'military':
+                page = "m-register.html"
+            case "psychologist":
+                page = "ps-register.html"
+            case "volunteer":
+                page = "v-register.html"
+        return render_template(page, error_message="Invalid bio must be between ")
     number = re.sub(r"[^0-9]", "", request.form.get("number")) \
 if request.form.get("number") else None
 
@@ -230,13 +315,11 @@ if request.form.get("number") else None
 
     else:
         user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
-    # regex 
-    # if 
-    if not used(username):
+    # changes
+    if not used(username) and validate_number(number) and validate_email(email) and validate_password(password) and validate_name(username):
         add_to_db(user)
         session["user"] = username
         return redirect(url_for("main"))
-    #regex
     match occupation:
         case 'military':
             page = "m-register.html"
