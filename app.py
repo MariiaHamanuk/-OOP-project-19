@@ -244,69 +244,28 @@ def save_user():
     username = request.form["username"]
 
     if not validate_name(username):
-        match occupation:
-            case 'military':
-                page = "m-register.html"
-            case "psychologist":
-                page = "ps-register.html"
-            case "volunteer":
-                page = "v-register.html"
         return render_template(page, error_message="Invalid username")
 
     email = request.form["email"]
 
     if not validate_email(email):
-        match occupation:
-            case 'military':
-                page = "m-register.html"
-            case "psychologist":
-                page = "ps-register.html"
-            case "volunteer":
-                page = "v-register.html"
         return render_template(page, error_message="Invalid email format")
 
     password = request.form["password"]
     if not validate_password(password):
-        match occupation:
-            case 'military':
-                page = "m-register.html"
-            case "psychologist":
-                page = "ps-register.html"
-            case "volunteer":
-                page = "v-register.html"
         return render_template(page, error_message="Invalid password format")
 
     name = request.form.get("name")
-    if not re.fullmatch('^.{1,30}$', name):
-        match occupation:
-            case 'military':
-                page = "m-register.html"
-            case "psychologist":
-                page = "ps-register.html"
-            case "volunteer":
-                page = "v-register.html"
-        return render_template(page, error_message="Invalid name must be between ")
-
+    #single name, WITHOUT spaces, WITH special characters
+    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', name):
+        return render_template(page, error_message="Invalid name must be between 1-30")
+    # no restriction to the size
     surname = request.form.get("surname")
-    if not re.fullmatch('^.{1,30}$', surname):
-        match occupation:
-            case 'military':
-                page = "m-register.html"
-            case "psychologist":
-                page = "ps-register.html"
-            case "volunteer":
-                page = "v-register.html"
-        return render_template(page, error_message="Invalid surname must be between ")
+    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', surname):
+        return render_template(page, error_message="Invalid surname must be between 1- 30")
     bio = request.form.get("bio")
     if not re.fullmatch('^.{1,300}$', bio):
-        match occupation:
-            case 'military':
-                page = "m-register.html"
-            case "psychologist":
-                page = "ps-register.html"
-            case "volunteer":
-                page = "v-register.html"
-        return render_template(page, error_message="Invalid bio must be between ")
+        return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number")) \
 if request.form.get("number") else None
 
