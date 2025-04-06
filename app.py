@@ -18,8 +18,8 @@ oauth = OAuth(app)
 
 google = oauth.register(
     name='google',
-    client_id='ВАШ_GOOGLE_CLIENT_ID',
-    client_secret='ВАШ_GOOGLE_CLIENT_SECRET',
+    client_id='200018166534-78genr8bc0as1eq485m832fe76mvor26.apps.googleusercontent.com',
+    client_secret='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',
     access_token_url='https://accounts.google.com/o/oauth2/token',
     access_token_params=None,
     authorize_url='https://accounts.google.com/o/oauth2/auth',
@@ -46,21 +46,7 @@ def google_auth():
 
     user = Users.query.filter_by(email=email).first()
     if not user:
-
-        user = Users(
-            occupation='volunteer',
-            username=username,
-            email=email,
-            number=None,
-            name=user_info.get('given_name'),
-            surname=user_info.get('family_name'),
-            bio='',
-            password='oauth',
-            verified=True,
-            rating=0.0
-        )
-        add_to_db(user)
-
+        return render_template('login.html', error_message="No account with this username")
     session['user'] = user.username
     return redirect(url_for('main'))
 #oauth
