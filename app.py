@@ -1,6 +1,6 @@
 '''back-end'''
 import re
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session #Response
 from flask_sqlalchemy import SQLAlchemy
 # from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -29,8 +29,10 @@ class Users(db.Model):
     bio = db.Column(db.String(500))
     verified = db.Column(db.Boolean)
 
-    picture = db.Column(db.Text)
+    picture = db.Column(db.LargeBinary)
     rating = db.Column(db.Float)
+
+    events = db.relationship('Events', backref='users', lazy=True)
 
     def __init__(self, occupation, username, email, number, name, \
 surname, bio, password, verified=True, rating=None):
@@ -50,21 +52,42 @@ surname, bio, password, verified=True, rating=None):
         self.rating = rating
 
 class Events(db.Model):
-    '''Event table'''
+    '''Events table'''
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(500), nullable=False)
-    picture = db.Column(db.Text)
     accepted = db.Column(db.Boolean)
+    date = db.Column(db.String(10), nullable=False)
+    time = db.Column(db.String(10), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    image = db.relationship('Images', backref='events', uselist=False, cascade='all, delete')
 
-    def __init__(self, title, description, picture):
+    def __init__(self, title, description, date, time, user_id, accepted=False):
         '''for positional arguments'''
         self.title = title
         self.description = description
-        self.picture = picture
-        self.accepted = False
 
+        self.date = date
+        self.time = time
 
+        self.user_id = user_id
+        self.accepted = accepted
+
+class Images(db.Model):
+    '''Images table'''
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(120), nullable=False)
+    data = db.Column(db.LargeBinary, nullable=False)
+    mimetype = db.Column(db.String(50), nullable=False)
+
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), unique=True, nullable=False)
+
+    def __init__(self, filename, data, mimetype, event_id):
+        '''for positional arguments'''
+        self.filename = filename
+        self.data = data
+        self.mimetype = mimetype
+        self.event_id = event_id
 
 @app.before_request
 def restricted_pages():
@@ -126,22 +149,26 @@ def settings():
 @app.route("/sign-in-military")
 def m_register():
     '''sign up page'''
-    return render_template("m-register.html")
+    error_message = request.args.get('error_message')
+    return render_template("m-register.html", error_message=error_message)
 
 @app.route('/sign-in-psychologist')
 def ps_register():
     '''sign up page'''
-    return render_template("ps-register.html")
+    error_message = request.args.get('error_message')
+    return render_template("ps-register.html", error_message=error_message)
 
 @app.route('/sign-in-volunteer')
 def v_register():
     '''sign up page'''
-    return render_template('v-register.html')
+    error_message = request.args.get('error_message')
+    return render_template('v-register.html', error_message=error_message)
 
 @app.route("/login")
 def login():
     '''sign up page'''
-    return render_template("login.html")
+    error_message = request.args.get('error_message')
+    return render_template("login.html", error_message=error_message)
 
 @app.route("/approving-psychologist")
 def ps_approving():
@@ -164,16 +191,16 @@ def validate_user():
     user = Users.query.filter_by(username=username).first()
 
     if not user:
-        return render_template('login.html', error_message="No account with this username")
+        return redirect(url_for("login", error_message="No account with this username"))
 
     if user.password == password:
-        if user.verified:
+        if user.verified or user.occupation != "psychologist":
             session["user"] = username
             return redirect(url_for("main"))
 
-        return render_template("login.html", error_message="Wait for the verification")
+        return redirect(url_for("login", error_message="Wait for the verification"))
 
-    return render_template("login.html", error_message="Wrong password")
+    return redirect(url_for("login", error_message="Wrong password"))
 
 @app.route("/save", methods=["POST"])
 def save_user():
@@ -190,26 +217,25 @@ def save_user():
     number = re.sub(r"[^0-9]", "", request.form.get("number")) \
 if request.form.get("number") else None
 
-    if occupation == 'military':
-        user = Users(occupation, username, email, number, name, surname, bio, password, True)
-
-    else:
-        user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
+    match occupation:
+        case 'military':
+            user = Users(occupation, username, email, number, name, surname, bio, password, True)
+            page = "m_register"
+        case "psychologist":
+            user = Users(occupation, username, email, number, name, surname, bio,password,False,0.0)
+            page = "ps_register"
+        case "volunteer":
+            user = Users(occupation, username, email, number, name, surname, bio, password, False)
+            page = "v_register"
 
     if not used(username):
+        if occupation == "psychologist":
+            return redirect(url_for(""))
         add_to_db(user)
         session["user"] = username
         return redirect(url_for("main"))
 
-    match occupation:
-        case 'military':
-            page = "m-register.html"
-        case "psychologist":
-            page = "ps-register.html"
-        case "volunteer":
-            page = "v-register.html"
-
-    return render_template(page, error_message="Account with this username already exists")
+    return redirect(url_for(page, error_message="Account with this username already exists"))
 
 def used(username):
     '''checks if name is already in use'''
@@ -234,11 +260,71 @@ def create_tables():
 
 def top_psychologists():
     '''sort psycholists by rating'''
-    psychologists = Users.query.filter_by(occupation="psychologist").all()
+    psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
     if psychologists:
         return sorted(sorted(psychologists, key=lambda p: p.username),\
 key=lambda p: p.rating, reverse=True)[:3]
 
+@app.route("/thank-you-for-registration")
+def waiting():
+    '''waiting page'''
+    return render_template("waiting-page.html")
+
+@app.route("/add-event")
+def add_event_page():
+    '''add event page'''
+    message = request.args.get('message')
+    return render_template("add-event.html", message=message)
+
+@app.route("/save-event", methods=["POST"])
+def add_event():
+    '''saving event'''
+    name = request.form["name"]
+    description = request.form["description"]
+    date = request.form["date"]
+    time = request.form["time"]
+
+    picture = request.files["picture"]
+
+    user = Users.query.filter_by(username=session["user"]).first()
+    accepted = user.verified
+
+    event = Events(name, description, date, time, user.id, accepted)
+    add_to_db(event)
+
+    if picture:
+        image = (name, picture, picture.mimetype)
+        add_to_db(image)
+
+
+    if accepted:
+        #renew event
+        message = "Подія була додана в календар. Дякую!"
+
+    else:
+        message = "Дякую за подію! Після верифікації вона буде додана до календаря подій"
+
+    return redirect(url_for("add_event_page", message=message))
+
+def display_events():
+    '''displays events'''
+    pass
+
+
+# def display_image():
+#     '''displays image'''
+#     days = Events.query.filter_by(verified=True).with_entities(Events.date).all()
+#     days = sorted(days, key=lambda d: )
+#     if days:
+
+#get picture
+#display calendar
+#settings
+#admin stuff
+#questions **
+
+#regex
+#oauth
 
 
 if __name__ == "__main__":

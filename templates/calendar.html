@@ -6,6 +6,8 @@
     <h1> Календар ;pp</h1>
     <br>
     {% if occupation != "military" %}
-        <button> додати подію </button>
+        <a href="{{ url_for('add_event_page') }}">
+            <button> Додати подію </button>
+        </a>
     {% endif %}
 </html>
