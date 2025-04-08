@@ -5,7 +5,20 @@
     </a>
     <h1> Календар ;pp</h1>
     <br>
+    {% if events %}
+        {% for event in events %}
+            <p>{{ event.title }}</p>
+            {% if event.image %}
+            <p>display image</p>
+            {% endif%}
+            <p>{{ event.description }}</p>
+            <p>{{ "{} - {}".format(event.time, event.date) }}</p>
+        {% endfor %}
+    {% else %}
+        <h2>Немає подій</h2>
+    {% endif %}
     {% if occupation != "military" %}
+    <br>
         <a href="{{ url_for('add_event_page') }}">
             <button> Додати подію </button>
         </a>

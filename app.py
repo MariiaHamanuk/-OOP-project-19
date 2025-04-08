@@ -1,5 +1,6 @@
 '''back-end'''
 import re
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session #Response
 from flask_sqlalchemy import SQLAlchemy
 # from werkzeug.security import generate_password_hash, check_password_hash
@@ -89,6 +90,12 @@ class Images(db.Model):
         self.mimetype = mimetype
         self.event_id = event_id
 
+class Preferences(db.Model):
+    '''Preferences table'''
+    id = db.Column(db.Integer, primary_key=True)
+
+
+
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
@@ -126,9 +133,10 @@ def main():
 @app.route("/calendar")
 def calendar():
     '''calendar page'''
+    events = display_events()
     user = Users.query.filter_by(username=session['user']).first()
     occupation = user.occupation
-    return render_template("calendar.html", occupation=occupation)
+    return render_template("calendar.html", occupation=occupation, events=events)
 
 @app.route("/questionnaire")
 def questions():
@@ -283,33 +291,43 @@ def add_event():
     description = request.form["description"]
     date = request.form["date"]
     time = request.form["time"]
+    year = datetime.now().year
 
     picture = request.files["picture"]
 
     user = Users.query.filter_by(username=session["user"]).first()
     accepted = user.verified
 
-    event = Events(name, description, date, time, user.id, accepted)
-    add_to_db(event)
+    if int(date.split("-")[2]) - year >= 0:
+        event = Events(name, description, date, time, user.id, accepted)
+        add_to_db(event)
 
-    if picture:
-        image = (name, picture, picture.mimetype)
-        add_to_db(image)
+        if picture:
+            image = (name, picture, picture.mimetype)
+            add_to_db(image)
 
 
-    if accepted:
-        #renew event
-        message = "Подія була додана в календар. Дякую!"
+        if accepted:
+            message = "Подія була додана в календар. Дякую!"
 
+        else:
+            message = "Дякую за подію! Після верифікації вона буде додана до календаря подій"
     else:
-        message = "Дякую за подію! Після верифікації вона буде додана до календаря подій"
+        message = "Неправильна дата"
 
     return redirect(url_for("add_event_page", message=message))
 
 def display_events():
     '''displays events'''
-    pass
+    events = Events.query.filter_by(accepted=True).all()
 
+    if events:
+        events = sorted(events, key=lambda e: int(e.time.replace(":", '.'))) #by time
+        events = sorted(events, key=lambda e: int(e.date.split("-")[1])) #by day
+        events = sorted(events, key=lambda e: int(e.date.split("-")[0])) #by month
+        events = sorted(events, key=lambda e: int(e.date.split("-")[2])) #by year
+
+    return events
 
 # def display_image():
 #     '''displays image'''
@@ -318,7 +336,6 @@ def display_events():
 #     if days:
 
 #get picture
-#display calendar
 #settings
 #admin stuff
 #questions **
