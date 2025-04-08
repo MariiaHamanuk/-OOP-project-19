@@ -88,7 +88,6 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            margin-top: 100px;
         }
         input {
             width: 50%;
@@ -165,11 +164,8 @@
                 <button>Не маю аккаунт</button>
             </div>
             <form action="/register" method="POST">
-                <input type="text" name="name" placeholder="Ваше ім'я" required>
-                <input type="text" name="surname" placeholder="Ваше прізвище" required>
-                <input type="tel" name="number" placeholder="Ваш номер" required>
-                <input type="email" name="email" placeholder="Ваш email" required>
-                <input type="text" name="description" placeholder="Розкажіть про себе *не обов'язково*">
+                <input type="text" name="username" placeholder="username" required>
+                <input type="email" name="email" placeholder="email" required>
                 <input type="password" name="password" placeholder="Пароль" required>
                 <button class="login-button" type="submit">Надіслати</button>
                 <div class="toggle-container">
