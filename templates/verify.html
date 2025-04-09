@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <a href="{{ url_for('main') }}">
+        <button> << </button>
+    </a>
+    <br>
+    <form action="{{ url_for('verify_manual') }}", method="POST">
+        <label for="username"> Username </label>
+        <br>
+        <input type="text" id="user" name="user">
+        <br>
+        <label for="email"> Event name</label>
+        <br>
+        <input type="text" id="event" name="event">
+        <br>
+        <button>submit</button>
+    </form>
+    {% if message %}
+    <p>{{ message }}</p>
+    {% endif %}
+
+</html>

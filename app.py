@@ -1,7 +1,7 @@
 '''back-end'''
 import re
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session #Response
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 # from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -21,13 +21,13 @@ class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     occupation = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(320), unique=True, nullable=False)
+    email = db.Column(db.Text, unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
 
-    number = db.Column(db.String(320), unique=True)
+    number = db.Column(db.Text, unique=True)
     name = db.Column(db.String(50))
     surname = db.Column(db.String(50))
-    bio = db.Column(db.String(500))
+    bio = db.Column(db.Text)
     verified = db.Column(db.Boolean)
 
     picture = db.Column(db.LargeBinary)
@@ -56,12 +56,11 @@ class Events(db.Model):
     '''Events table'''
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.Text, nullable=False)
     accepted = db.Column(db.Boolean)
     date = db.Column(db.String(10), nullable=False)
     time = db.Column(db.String(10), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    image = db.relationship('Images', backref='events', uselist=False, cascade='all, delete')
 
     def __init__(self, title, description, date, time, user_id, accepted=False):
         '''for positional arguments'''
@@ -73,22 +72,6 @@ class Events(db.Model):
 
         self.user_id = user_id
         self.accepted = accepted
-
-class Images(db.Model):
-    '''Images table'''
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(120), nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)
-    mimetype = db.Column(db.String(50), nullable=False)
-
-    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), unique=True, nullable=False)
-
-    def __init__(self, filename, data, mimetype, event_id):
-        '''for positional arguments'''
-        self.filename = filename
-        self.data = data
-        self.mimetype = mimetype
-        self.event_id = event_id
 
 class Preferences(db.Model):
     '''Preferences table'''
@@ -293,19 +276,12 @@ def add_event():
     time = request.form["time"]
     year = datetime.now().year
 
-    picture = request.files["picture"]
-
     user = Users.query.filter_by(username=session["user"]).first()
     accepted = user.verified
 
-    if int(date.split("-")[2]) - year >= 0:
+    if int(date.split("-")[0]) >= year:
         event = Events(name, description, date, time, user.id, accepted)
         add_to_db(event)
-
-        if picture:
-            image = (name, picture, picture.mimetype)
-            add_to_db(image)
-
 
         if accepted:
             message = "Подія була додана в календар. Дякую!"
@@ -322,23 +298,68 @@ def display_events():
     events = Events.query.filter_by(accepted=True).all()
 
     if events:
-        events = sorted(events, key=lambda e: int(e.time.replace(":", '.'))) #by time
-        events = sorted(events, key=lambda e: int(e.date.split("-")[1])) #by day
-        events = sorted(events, key=lambda e: int(e.date.split("-")[0])) #by month
+        events = sorted(events, key=lambda e: float(e.time.replace(":", '.'))) #by time
+        events = sorted(events, key=lambda e: int(e.date.split("-")[0])) #by day
+        events = sorted(events, key=lambda e: int(e.date.split("-")[1])) #by month
         events = sorted(events, key=lambda e: int(e.date.split("-")[2])) #by year
 
     return events
 
-# def display_image():
-#     '''displays image'''
-#     days = Events.query.filter_by(verified=True).with_entities(Events.date).all()
-#     days = sorted(days, key=lambda d: )
-#     if days:
+
+
+@app.route("/verify")
+def verify_page():
+    '''manual verification of users and events'''
+    message = request.args.get('message')
+    return render_template("verify.html", message=message)
+
+
+@app.route("/verify-manual",  methods=["POST"])
+def verify_manual():
+    username = request.form.get("user")
+    eventname = request.form.get("event")
+
+    message = ""
+
+    if username:
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            user.verified = not user.verified
+            db.session.commit()
+            message = f"{user.username} {"un" if not user.verified else ""}verified"
+        else:
+            message = "Invalid username"
+
+    if eventname:
+        event = Users.query.filter_by(title=eventname).first()
+        if event:
+            event.accepted = not event.accepted
+            db.session.commit()
+            message = f"{event.title} {"un" if not event.accepted else ""}accepted"
+        else:
+            message = "Invalid event name"
+    return redirect(url_for('verify_page', message=message))
+
+
+
+def auto_verify():
+    pass
+
+def delete_user():
+    pass
+
+def update_info():
+    pass
+
+def display_profile(user_id):
+    pass
 
 #get picture
 #settings
 #admin stuff
 #questions **
+#delete account
+#decomposition
 
 #regex
 #oauth

@@ -14,6 +14,11 @@
     <a href="{{ url_for('settings') }}">
         <button> Настройки </button>
     </a>
+    {% if occupation == "admin" %}
+        <a href="{{ url_for('verify_page') }}">
+            <button> Верифікація користувачів і подій </button>
+        </a>
+    {% endif %}
     <a href="{{ url_for('logout_page') }}">
         <button> Вийти </button>
     </a>
