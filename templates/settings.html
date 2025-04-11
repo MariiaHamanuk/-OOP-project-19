@@ -3,5 +3,50 @@
     <a href="{{ url_for('main') }}">
         <button> << </button>
     </a>
-    <h1> Настройки ;pp</h1>
+    <h1> Змінити інформацію </h1>
+    <form action="{{ url_for('update_info') }}", method="POST">
+
+        <label for="username"> Введіть новий юзернейм </label>
+        <br>
+        <input type="text" id="username" name="username" placeholder="...">
+        <br>
+        <label for="bio"> Біографія </label>
+        <br>
+        <input type="text" id="bio" name="bio" placeholder="...">
+        <br>
+        <label for="email"> email </label>
+        <br>
+        <input type="email" id="email" name="email" placeholder="...">
+        <br>
+        <label for="number"> number </label>
+        <br>
+        <input type="text" id="number" name="number" placeholder="+380 XX XXX XXXX">
+        <br>
+        <label for="new_password"> Новий пароль </label>
+        <br>
+        <input type="password" id="new_password" name="new_password" placeholder="...">
+        <br>
+        <label for="password"> Пароль </label>
+        <br>
+        <input type="password" id="password" name="password" placeholder="..." required>
+
+        <br>
+        <br>
+        
+        <button>submit</button>
+
+    </form>
+    <br>
+    <form action="{{ url_for('delete_account') }}" method="POST">
+        <label for="password"> Видалити акаунт </label>
+        <br>
+        <input type="password" id="password" name="password" placeholder="..." required>
+        <br>
+        <button>submit</button>
+    </form>
+
+    {% if message %}
+    <p>{{ message }}</p>
+    {% endif %}
+
 </html>

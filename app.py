@@ -134,7 +134,8 @@ def profile():
 @app.route("/settings")
 def settings():
     '''settings page'''
-    return render_template("settings.html")
+    message = request.args.get('message')
+    return render_template("settings.html", message=message)
 
 
 @app.route("/sign-in-military")
@@ -274,12 +275,14 @@ def add_event():
     description = request.form["description"]
     date = request.form["date"]
     time = request.form["time"]
-    year = datetime.now().year
+
+    year, month, day = list(map(int, date.split("-")))
+    hour, minute = list(map(int, time.split(":")))
 
     user = Users.query.filter_by(username=session["user"]).first()
     accepted = user.verified
 
-    if int(date.split("-")[0]) >= year:
+    if datetime(year, month, day, hour, minute) >= datetime.now():
         event = Events(name, description, date, time, user.id, accepted)
         add_to_db(event)
 
@@ -316,6 +319,7 @@ def verify_page():
 
 @app.route("/verify-manual",  methods=["POST"])
 def verify_manual():
+    '''manual user/event verifier'''
     username = request.form.get("user")
     eventname = request.form.get("event")
 
@@ -345,21 +349,53 @@ def verify_manual():
 def auto_verify():
     pass
 
-def delete_user():
-    pass
-
+@app.route("/update-info", methods=["POST"])
 def update_info():
-    pass
+    '''updates info about user'''
+    user = Users.query.filter_by(username = session['user']).first()
 
-def display_profile(user_id):
-    pass
+    username = request.form.get("username")
+    bio = request.form.get("bio")
+    email = request.form.get("email")
+    number = request.form.get("number")
+    new_password = request.form.get("new_password")
 
-#get picture
-#settings
-#admin stuff
+    message = "Неправильний пароль"
+
+    if user.password == request.form["password"]:
+        user.username = username if username else user.username
+        user.bio = bio if bio else user.bio
+        user.email = email if email else user.email
+        user.number = number if number else user.number
+        user.password = new_password if new_password else user.password
+        db.session.commit()
+        message = "Дані успішно оновлено"
+
+    return redirect(url_for('settings', message=message))
+
+# @app.route("/profile/<int:user_id>")
+# def profile(user_id):
+#     '''profile page with user ID in endpoint'''
+#     user_id = Users.query.get_or_404(user_id)
+#     return render_template("profile.html", user=user)
+
+@app.route("/account-deletion", methods=["POST"])
+def delete_account():
+    '''deletes account completely'''
+    user = Users.query.filter_by(username=session["user"]).first()
+    if user.password == request.form["password"]:
+        Events.query.filter_by(user_id=user.id).delete()
+        db.session.delete(user)
+        db.session.commit()
+        logout()
+    return redirect(url_for('settings', message="Неправильний пароль"))
+
+#add autodeletion for events
 #questions **
-#delete account
 #decomposition
+#display profile
+#hashing passwords
+#rating system
 
 #regex
 #oauth
