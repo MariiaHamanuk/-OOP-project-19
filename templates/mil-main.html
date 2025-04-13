@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beyond Duty — Головна</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #ffffff;
+      color: #111;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: #243a76;
+    }
+
+    .logo .dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #6ddbd4;
+      margin-right: 10px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .avatar-small {
+      width: 35px;
+      height: 35px;
+      background-color: #ccc;
+      border-radius: 50%;
+    }
+
+    .hero-section {
+      position: relative;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero-section img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center bottom;
+      clip-path: inset(0 0 2cm 0);
+      opacity: 0.6;
+    }
+
+    .survey-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #6ddbd4;
+      color: #243a76;
+      border: none;
+      padding: 15px 200px; /* Зроблено кнопку ширшою */
+      font-size: 16px;
+      font-weight: bold; /* Текст став жирнішим */
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .survey-btn:hover {
+      background-color: #9aeae4;
+    }
+
+    .top-psychologists {
+      padding: 40px;
+    }
+
+    .top-psychologists h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .psychologist-list {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .psychologist-card {
+      width: 180px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .psychologist-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .psychologist-card span {
+      display: block;
+      padding: 10px;
+      background-color: #f1f1f1;
+      font-weight: bold;
+    }
+
+    .upcoming-events {
+      padding: 0 40px 40px;
+    }
+
+    .upcoming-events h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .event-list {
+      display: flex;
+      gap: 30px;
+    }
+
+    .event-card {
+      flex: 1;
+      min-width: 200px;
+      height: 150px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      background-color: #243a76;
+      padding: 40px;
+      text-align: center;
+      color: white;
+    }
+
+    footer h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    footer p {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .feedback-form {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .feedback-form input[type="text"] {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+      min-width: 200px;
+    }
+
+    .feedback-form button {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: none;
+      background: linear-gradient(to right, #70d1cf, #51c1d2);
+      color: #243a76;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="main-header">
+    <div class="logo">
+      <div class="dot"></div>
+      <span><strong>BEYOND DUTY</strong></span>
+    </div>
+    <nav class="nav-links">
+      <a href="#">Календар подій</a>
+      <a href="#">Ваші психологи</a>
+      <a href="#">Про проєкт</a>
+      <div class="avatar-small"></div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <img src="https://kartinki.pics/uploads/posts/2022-12/1672128608_kartinkin-net-p-kartinka-psikholog-i-klient-vkontakte-1.jpg" alt="Герой">
+      <button class="survey-btn">Пройти опитування</button>
+    </section>
+
+    <section class="top-psychologists">
+      <h2>Топ наших психологів:</h2>
+      <div class="psychologist-list">
+        <div class="psychologist-card" onclick="location.href='#';">
+          <img src="https://kartinki.pics/uploads/posts/2022-12/1672128608_kartinkin-net-p-kartinka-psikholog-i-klient-vkontakte-1.jpg" alt="Степан">
+          <span>Степан</span>
+        </div>
+        <div class="psychologist-card" onclick="location.href='#';">
+          <img src="https://kartinki.pics/uploads/posts/2022-12/1672128608_kartinkin-net-p-kartinka-psikholog-i-klient-vkontakte-1.jpg" alt="Степан">
+          <span>Степан</span>
+        </div>
+        <div class="psychologist-card" onclick="location.href='#';">
+          <img src="https://kartinki.pics/uploads/posts/2022-12/1672128608_kartinkin-net-p-kartinka-psikholog-i-klient-vkontakte-1.jpg" alt="Степан">
+          <span>Степан</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="upcoming-events">
+      <h2>найближчі події:</h2>
+      <div class="event-list">
+        <div class="event-card"></div>
+        <div class="event-card"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <h2><strong>Beyond Duty</strong></h2>
+    <p>Напишіть відгук</p>
+    <div class="feedback-form">
+      <input type="text" placeholder="Ваш відгук...">
+      <button>Надіслати</button>
+    </div>
+  </footer>
+
+</body>
+</html>

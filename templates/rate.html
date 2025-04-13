@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Beyond Duty - Профіль психолога</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #ffffff;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+    }
+
+    .logo {
+      font-weight: bold;
+      font-weight: 800;
+      font-size: 24px;
+      color: #2C3E77;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 40px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #444;
+      font-size: 14px;
+    }
+
+    .avatar-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ccc;
+    }
+
+    .profile-card {
+      background: #1B2D64;
+      border-radius: 20px;
+      padding: 30px;
+      margin: 20px 40px;
+      display: flex;
+      color: white;
+      gap: 20px;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #ccc;
+      border: 5px solid white;
+    }
+
+    .info-block {
+      background-color: #BCC7E6;
+      color: #1B2D64;
+      padding: 20px;
+      border-radius: 10px;
+      flex: 1;
+    }
+
+    .info-block h2 {
+      margin-top: 0;
+    }
+
+    .rating-section {
+      background-color: #e7edf7;
+      border-radius: 25px;
+      margin: 80px 40px 120px;
+      padding: 30px;
+    }
+
+    .rating-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .rating-stars {
+      background: #2C3E77;
+      display: inline-flex;
+      padding: 10px 20px;
+      border-radius: 20px;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .star {
+      font-size: 28px;
+      color: #FFD700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .star:hover {
+      transform: scale(1.2);
+    }
+
+    .star.inactive {
+      color: #ccc;
+    }
+
+    .comment-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .comment-box input {
+      padding: 10px 20px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      width: 300px;
+      font-size: 14px;
+    }
+
+    .comment-box button {
+      padding: 10px 25px;
+      background: #6ED1D1;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      height: 60px;
+      background: #1B2D64;
+      width: 100%;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div style="width: 30px; height: 30px; background: #6ddbd4; border-radius: 50%;"></div>
+    BEYOND DUTY
+  </div>
+  <nav class="nav">
+    <a href="#">Календар подій</a>
+    <a href="#">Ваші психологи</a>
+    <a href="#">Про проєкт</a>
+    <div class="avatar-icon"></div>
+  </nav>
+</header>
+
+<section class="profile-card">
+  <div class="avatar"></div>
+  <div class="info-block">
+    <h2>Станіслав Коваленко</h2>
+    <p><strong>Gmail:</strong> stanislav.kovalenko@gmail.com</p>
+    <p><strong>Номер телефону:</strong> 095 094 98 46</p>
+    <p><strong>Рейтинг:</strong> 4.8/5 ⭐</p>
+  </div>
+  <div class="info-block">
+    <strong>Опис психолога</strong>
+    <p>
+      Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+      accusantium doloremque laudantium, totam rem aperiam eaque ipsa...
+    </p>
+  </div>
+</section>
+
+<section class="rating-section">
+
+  <!-- Рядок з оцінкою -->
+  <div class="rating-row">
+    <strong>Оцінити:</strong>
+    <div class="rating-stars" id="stars">
+      <span class="star" data-value="1">★</span>
+      <span class="star" data-value="2">★</span>
+      <span class="star" data-value="3">★</span>
+      <span class="star" data-value="4">★</span>
+      <span class="star" data-value="5">★</span>
+    </div>
+  </div>
+
+  <!-- Рядок з відгуком -->
+  <div class="comment-box">
+    <strong>Написати відгук психологу:</strong>
+    <input type="text" placeholder="Ваш відгук..." />
+    <button>Надіслати</button>
+  </div>
+</section>
+
+<footer></footer>
+
+<script>
+  const stars = document.querySelectorAll('.star');
+  let currentRating = 3;
+
+  function updateStars(rating) {
+    stars.forEach(star => {
+      const value = parseInt(star.getAttribute('data-value'));
+      if (value <= rating) {
+        star.classList.remove('inactive');
+      } else {
+        star.classList.add('inactive');
+      }
+    });
+  }
+
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      currentRating = parseInt(star.getAttribute('data-value'));
+      updateStars(currentRating);
+      console.log('Оцінка:', currentRating);
+    });
+  });
+
+  updateStars(currentRating);
+</script>
+
+</body>
+</html>
