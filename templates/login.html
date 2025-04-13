@@ -212,6 +212,10 @@
                 <input type="text" name="username" placeholder="Ваше ім'я" required>
                 <input type="password" name="password" placeholder="Пароль" required>
                 <button class="login-button" type="submit">Login</button>
+                <a href="{{ url_for('google_login') }}">
+                    <button>Login through google</button>
+                </a>
+
                 <div class="toggle-container">
                     <input type="checkbox" id="account-toggle" class="switch-input">
                     <label for="account-toggle" class="switch-label">

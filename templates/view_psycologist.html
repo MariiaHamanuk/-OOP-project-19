@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ psychologist.name }} {{ psychologist.surname }}</h2>
+<p><i>{{ psychologist.bio }}</i></p>
+
+<h4>Оціни психолога:</h4>
+<form method="POST">
+  <label for="rating">Оцінка (1–5):</label><br>
+  {% for i in range(1,6) %}
+    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+    <label for="star{{ i }}">★</label>
+  {% endfor %}
+  <br><br>
+  <button type="submit">Зберегти оцінку</button>
+</form>
+
+<p><a href="{{ url_for('psychologist_list') }}">← Назад до списку</a></p>
+{% endblock %}

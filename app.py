@@ -2,6 +2,7 @@
 import re
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from authlib.integrations.flask_client import OAuth
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -9,12 +10,46 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = "very_secure123"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:very_secure321@localhost:5432/base'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Olalaiamfine5162@localhost:5432/base'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+#oauth
+oauth = OAuth(app)
 
+google = oauth.register(
+    name='google',
+    client_id='200018166534-78genr8bc0as1eq485m832fe76mvor26.apps.googleusercontent.com',
+    client_secret='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',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params={
+        'access_type': 'offline',
+        'prompt': 'consent'
+    },
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
+    client_kwargs={'scope': 'openid email profile'}
+)
 
+@app.route('/login/google')
+def google_login():
+    redirect_uri = url_for('google_auth', _external=True)
+    return google.authorize_redirect(redirect_uri)
 
+@app.route('/auth/google')
+def google_auth():
+    token = google.authorize_access_token()
+    user_info = google.get('userinfo').json()
+    email = user_info['email']
+    username = user_info.get('name', email.split('@')[0])
+
+    user = Users.query.filter_by(email=email).first()
+    if not user:
+        return render_template('login.html', error_message="No account with this username")
+    session['user'] = user.username
+    return redirect(url_for('main'))
+#oauth
 class Users(db.Model):
     '''Users table'''
     id = db.Column(db.Integer, primary_key=True)
@@ -175,18 +210,68 @@ def validate_user():
 
     return render_template("login.html", error_message="Wrong password")
 
+#all of the regex functions
+def validate_name(name):
+    ''' complitad regex for username min. 3 char and max. 30, special
+    characters can be allowed, if all characters are only special 
+    characters it should return false'''
+    regex = "^(?=.*[A-Za-z0-9])[A-Za-z0-9 _\-\.]{3,30}$"
+    return re.fullmatch(regex, name) is not None
+
+def validate_email(email):
+    '''regex for email'''
+    regex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    return re.fullmatch(regex, email) is not None
+
+def validate_password(password):
+    '''Minimum eight and maximum 10 characters, at least one
+    uppercase letter, one lowercase letter, one number and one special character:'''
+    regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,20}$"
+    return re.fullmatch(regex, password) is not None
+
+def validate_number(number):
+    '''must be checked '''
+    regex = "^\+?[0-9]{10,15}$"
+    return re.fullmatch(regex, number) is not None
+#all of the regex functions
+
+
 @app.route("/save", methods=["POST"])
 def save_user():
     '''saves user to file'''
     occupation = request.form["occupation"]
-
+    match occupation:
+        case 'military':
+            page = "m-register.html"
+        case "psychologist":
+            page = "ps-register.html"
+        case "volunteer":
+            page = "v-register.html"
     username = request.form["username"]
+
+    if not validate_name(username):
+        return render_template(page, error_message="Invalid username")
+
     email = request.form["email"]
+
+    if not validate_email(email):
+        return render_template(page, error_message="Invalid email format")
+
     password = request.form["password"]
+    if not validate_password(password):
+        return render_template(page, error_message="Invalid password format")
 
     name = request.form.get("name")
+    #single name, WITHOUT spaces, WITH special characters
+    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', name):
+        return render_template(page, error_message="Invalid name must be between 1-30")
+    # no restriction to the size
     surname = request.form.get("surname")
+    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', surname):
+        return render_template(page, error_message="Invalid surname must be between 1- 30")
     bio = request.form.get("bio")
+    if not re.fullmatch('^.{1,300}$', bio):
+        return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number")) \
 if request.form.get("number") else None
 
@@ -195,21 +280,73 @@ if request.form.get("number") else None
 
     else:
         user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
-
-    if not used(username):
+    # changes
+    if not used(username) and validate_number(number) and validate_email(email) and validate_password(password) and validate_name(username):
         add_to_db(user)
         session["user"] = username
         return redirect(url_for("main"))
 
-    match occupation:
-        case 'military':
-            page = "m-register.html"
-        case "psychologist":
-            page = "ps-register.html"
-        case "volunteer":
-            page = "v-register.html"
 
     return render_template(page, error_message="Account with this username already exists")
+
+class Rating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # військовий
+    psychologist_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # психолог
+    score = db.Column(db.Float, nullable=False)
+from collections import defaultdict
+
+def calculate_influence_scores():
+    ratings = Rating.query.all()
+    user_influence = defaultdict(int)
+
+    for r in ratings:
+        user_influence[r.user_id] += 1
+
+    return user_influence
+
+def calculate_psychologist_reputation():
+    ratings = Rating.query.all()
+    influence = calculate_influence_scores()
+    scores = defaultdict(lambda: [0, 0])  # psychologist_id: [total_weighted, total_weight]
+
+    for r in ratings:
+        weight = influence[r.user_id]
+        scores[r.psychologist_id][0] += r.score * weight
+        scores[r.psychologist_id][1] += weight
+
+    reputations = {}
+    for pid, (total, weight) in scores.items():
+        reputations[pid] = round(total / weight, 2) if weight > 0 else 0.0
+
+    return reputations
+@app.route("/psychologists")
+def psychologist_list():
+    rep_scores = calculate_psychologist_reputation()
+    psychologists = Users.query.filter_by(occupation="psychologist").all()
+    # присвоїти рейтинги з rep_scores
+    for p in psychologists:
+        p.rating = rep_scores.get(p.id, 0.0)
+    # сортування
+    psychologists_sorted = sorted(psychologists, key=lambda p: p.rating, reverse=True)
+    return render_template("psychologists.html", psychologists=psychologists_sorted)
+@app.route("/psychologist/<int:id>", methods=["GET", "POST"])
+def view_psychologist(id):
+    user = Users.query.filter_by(username=session['user']).first()
+    psychologist = Users.query.get(id)
+
+    if request.method == "POST":
+        score = float(request.form["rating"])
+        existing = Rating.query.filter_by(user_id=user.id, psychologist_id=id).first()
+        if existing:
+            existing.score = score
+        else:
+            rating = Rating(user_id=user.id, psychologist_id=id, score=score)
+            db.session.add(rating)
+        db.session.commit()
+        return redirect(url_for("psychologist_list"))
+
+    return render_template("view_psychologist.html", psychologist=psychologist)
 
 def used(username):
     '''checks if name is already in use'''
