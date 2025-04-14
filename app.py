@@ -77,13 +77,12 @@ class Preferences(db.Model):
     '''Preferences table'''
     id = db.Column(db.Integer, primary_key=True)
 
-
-
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
-    restricted = ["/main", "/calendar", "/profile", "/settings", "/questionnaire", "/logout"]
-    if request.path in restricted and "user" not in session:
+    restricted = ["/main", "/calendar", "/settings", "/questionnaire", "/logout"]
+    if (request.path in restricted or re.match(r"^/profile/[^/]+$", request.path)) \
+       and "user" not in session:
         return redirect(url_for("start"))
 
 @app.before_request
@@ -126,10 +125,13 @@ def questions():
     '''questionnaire page'''
     return render_template("questions.html")
 
-@app.route("/profile")
-def profile():
+@app.route('/profile/<username>')
+def profile(username):
     '''profile page'''
-    return render_template("profile.html")
+    user = Users.query.filter_by(username=username).first()
+    if not user:
+        render_template("error.html", error_message="No user with this username")
+    return render_template('profile.html', user=user)
 
 @app.route("/settings")
 def settings():
@@ -162,15 +164,10 @@ def login():
     error_message = request.args.get('error_message')
     return render_template("login.html", error_message=error_message)
 
-@app.route("/approving-psychologist")
-def ps_approving():
+@app.route("/waiting")
+def waiting_page():
     '''after signing up page'''
-    return render_template("ps-approving.html")
-
-@app.route("/approving-event")
-def v_approving():
-    '''after sending event page'''
-    return render_template('v-approving.html')
+    return render_template("waiting-page.html")
 
 
 
@@ -222,7 +219,7 @@ if request.form.get("number") else None
 
     if not used(username):
         if occupation == "psychologist":
-            return redirect(url_for(""))
+            return redirect(url_for("waiting_page"))
         add_to_db(user)
         session["user"] = username
         return redirect(url_for("main"))
@@ -369,15 +366,12 @@ def update_info():
         user.number = number if number else user.number
         user.password = new_password if new_password else user.password
         db.session.commit()
+
+        session["user"] = user.username
         message = "Дані успішно оновлено"
 
     return redirect(url_for('settings', message=message))
 
-# @app.route("/profile/<int:user_id>")
-# def profile(user_id):
-#     '''profile page with user ID in endpoint'''
-#     user_id = Users.query.get_or_404(user_id)
-#     return render_template("profile.html", user=user)
 
 @app.route("/account-deletion", methods=["POST"])
 def delete_account():
@@ -388,18 +382,19 @@ def delete_account():
         db.session.delete(user)
         db.session.commit()
         logout()
+
     return redirect(url_for('settings', message="Неправильний пароль"))
 
 #add autodeletion for events
-#questions **
 #decomposition
-#display profile
-#hashing passwords
 #rating system
+
+#email mailing
+#hashing passwords
 
 #regex
 #oauth
-
+#questions
 
 if __name__ == "__main__":
     create_tables()

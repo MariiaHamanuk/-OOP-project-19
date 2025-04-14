@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html>
+    <a href="{{ session.get('prev_url', url_for('start')) }}">
+        <button> << </button>
+    </a>
+    <br>
+    <h1>{{ error_message }}</h1>
+</html>

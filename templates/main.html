@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
-    {% if occupation == "military" or occupation == "admin" %}
+    {% if occupation != "volunteer" %}
         <a href="{{ url_for('questions') }}">
-            <button> Опитувальник </button>
+            <button> Пройти опитування </button>
         </a>
     {% endif %}
     <a href="{{ url_for('calendar') }}">
         <button> Календар </button>
     </a>
-    <a href="{{ url_for('profile') }}">
+    <a href="{{ url_for('profile', username=session['user']) }}">
         <button> Профіль </button>
     </a>
     <a href="{{ url_for('settings') }}">
@@ -28,7 +28,12 @@
 
     {% if top %}
         {% for p in top %}
-            <li>{{ "{}. {}".format(loop.index,p.name) }}</li>
+            <li>
+                <a href="{{ url_for('profile', username=p.username) }}">
+                    {{ "{}. {}".format(loop.index, p.name) }}
+                </a>
+            </li>
+            <p>p.rating</p>
         {% endfor %}
     {% else %}
         <h5>Пусто</h5>
