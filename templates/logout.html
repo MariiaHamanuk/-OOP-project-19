@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
     <h3> Підтвердити вихід? </h3>
     <a href="{{ url_for('logout') }}">
@@ -7,4 +7,70 @@
     <a href="{{ url_for('main') }}">
         <button> Ні </button>
     </a>
+</html> -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Підтвердження виходу</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h3 {
+            color: #1d2c5b;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .button {
+            background-color: #6ec6c4;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            margin: 10px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #4b9391;
+        }
+
+        .button-danger {
+            background-color: #ff4c4c;
+        }
+
+        .button-danger:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>Підтвердити вихід?</h3>
+        <a href="{{ url_for('start') }}" class="button button-danger">Так</a>
+        <a href="{{ url_for('main') }}" class="button">Ні</a>
+    </div>
+</body>
 </html>
