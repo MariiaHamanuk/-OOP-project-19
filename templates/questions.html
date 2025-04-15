@@ -193,9 +193,9 @@
       <span class="logo-text">BEYOND DUTY</span>
     </a>
     <div class="nav-links">
-      <a href="/events" class="nav-link">Календар подій</a>
-      <a href="/psychologists" class="nav-link">Ваші психологи</a>
-      <a href="/profile" class="profile-link">
+      <a href="{{ url_for('calendar') }}">Календар подій</a>
+      <a href="/psychologists">Ваші психологи</a>
+      <a href="{{ url_for('profile') }}">
         <span id="user-name">Олександр</span>
         <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
           <path d="M1 1L6 5L11 1" stroke="#666" stroke-width="1.5"/>
@@ -234,8 +234,8 @@
     // Get user info from URL or localStorage
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user_id') || localStorage.getItem('userId') || '';
-    const occupation = params.get('occupation') || localStorage.getItem('occupation') || 'military';
-    
+    // const occupation = document.body.dataset.occupation || 'military'
+    const occupation = "{{ occupation }}"
     // Set hidden form values
     document.getElementById('user_id').value = userId;
     document.getElementById('occupation').value = occupation;
@@ -248,7 +248,7 @@
     
     // Define questions for different occupations
     const allQuestions = {
-      'military': [
+      military: [
         {
           text: "Чи вважаєте ви, що психолог має мати військовий досвід?",
           options: ["Так", "Ні"],
@@ -275,7 +275,7 @@
           name: "age"
         }
       ],
-      'psychologist': [
+      psychologist: [
         {
           text: "Чи маєте ви досвід роботи з військовими?",
           options: ["Так", "Ні"],
@@ -305,7 +305,7 @@
     };
     
     // Use the appropriate question set based on occupation
-    let questions = allQuestions[occupation] || allQuestions['military'];
+    let questions = allQuestions[occupation];
     let current = 0;
     const answers = {};
 
@@ -417,6 +417,7 @@
       });
     });
 
+    // Initialize on page load
     window.addEventListener('load', renderQuestion);
   </script>
 </body>
