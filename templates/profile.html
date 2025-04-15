@@ -1,30 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ user.username }}</title>
+    <style>
+        .star-rating {
+            direction: rtl;
+            display: inline-flex;
+            font-size: 2rem;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            color: #ccc;
+            cursor: pointer;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: gold;
+        }
+    </style>
+</head>
+<body>
     <a href="{{ url_for('main') }}">
-        <button> << </button>
+        <button> &laquo; Назад </button>
     </a>
-    <a href="{{ url_for('settings') }}">
-        <button> Редагувати профіль </button>
-    </a>
-    <!-- мені треба зробити так аби мілітарі бачив психолога профіль це скоріше за все треба зробити окремо порадитися з Нестором -->
-    <a {%if occupation = 'psychologist'%}>
-        <h1>Психолог: {{ psychologist.name }} {{ psychologist.surname }}</h1>
-        <p><strong>Біо:</strong> {{ psychologist.bio or "Немає опису." }}</p>
-        <p><strong>Поточний рейтинг:</strong> {{ psychologist.rating or 0 }}</p>
 
-        <h2>Оцініть цього психолога:</h2>
-        <form method="POST">
-            <div class="star-rating">
-                {% for i in range(5, 0, -1) %}
-                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
-                    <label for="star{{ i }}">★</label>
-                {% endfor %}
-            </div>
-            <br><br>
-            <button type="submit">Надіслати оцінку</button>
-        </form>
+    {% if user.username == session["user"] %}
+        <a href="{{ url_for('settings') }}">
+            <button> Редагувати профіль </button>
+        </a>
+    {% endif %}
 
-        <br><a href="{{ url_for('psychologist_list') }}">← Назад до списку</a>
-    </a>
-    <h1> Профіль ;pp</h1>
+    <h1>{{ user.username }}</h1>
+
+    {% if user.username == session["user"] %}
+        {% if user.email %}
+            <h3>{{ user.email }}</h3>
+        {% endif %}
+        {% if user.number %}
+            <h3>{{ user.number }}</h3>
+        {% endif %}
+    {% endif %}
+
+    {% if user.surname %}
+        <h3>{{ user.surname }}</h3>
+    {% endif %}
+    {% if user.name %}
+        <h3>{{ user.name }}</h3>
+    {% endif %}
+    {% if user.bio %}
+        <h5>{{ user.bio }}</h5>
+    {% endif %}
+
+    {% if user.occupation == "psychologist" %}
+        <h4>Рейтинг: {{ user.rating }}</h4>
+
+        {% if user.username != session["user"] %}
+            {% if current_user.occupation == "military" %}
+                <form method="POST">
+                    <div class="star-rating">
+                        {% for i in range(5, 0, -1) %}
+                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+                            <label for="star{{ i }}">★</label>
+                        {% endfor %}
+                    </div>
+                    <br><br>
+                    <button type="submit">Надіслати оцінку</button>
+                </form>
+            {% elif current_user.occupation == "volunteer" %}
+                <p><em>Ви не маєте доступу до цього профілю.</em></p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</body>
 </html>

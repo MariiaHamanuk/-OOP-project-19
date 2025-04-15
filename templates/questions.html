@@ -1,7 +1,309 @@
 <!DOCTYPE html>
-<html>
-    <a href="{{ url_for('main') }}">
-        <button> << </button>
+<!-- маю проблеми з переходом по покликанням зверху -->
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Опитування - Beyond Duty</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f7;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 50px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-circle {
+      width: 30px;
+      height: 30px;
+      background-color: #50c6c2;
+      border-radius: 50%;
+    }
+
+    .logo-text {
+      color: #1e3a78;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: #666;
+    }
+
+    .profile-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .poll-header {
+      background-color: #1e3a78;
+      color: white;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5em;
+    }
+
+    .poll-content {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .poll-content h2 {
+      margin-bottom: 30px;
+      font-weight: normal;
+      color: #444;
+      text-align: center;
+      width: 100%;
+    }
+
+    .answers-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .answer-button {
+      width: 70%;
+      padding: 15px;
+      background-color: white;
+      border: 2px solid #50c6c2;
+      border-radius: 30px;
+      font-size: 1em;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .answer-button:hover {
+      background-color: #50c6c2;
+      color: white;
+    }
+    
+    .answer-button.selected {
+      background-color: #50c6c2;
+      color: white;
+    }
+
+    .poll-footer {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #eee;
+    }
+
+    .btn {
+      padding: 10px 25px;
+      border-radius: 25px;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.2s;
+    }
+
+    .btn-secondary {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-primary {
+      background-color: #50c6c2;
+      color: white;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="#" class="logo">
+      <div class="logo-circle"></div>
+      <span class="logo-text">BEYOND DUTY</span>
     </a>
-    <h1> Опитувальник ;pp</h1>
+    <div class="nav-links">
+      <a href="#" class="nav-link">Календар подій</a>
+      <a href="#" class="nav-link">Ваші психологи</a>
+      <a href="#" class="profile-link">
+        <span>Олександр</span>
+        <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
+          <path d="M1 1L6 5L11 1" stroke="#666" stroke-width="1.5"/>
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <form id="poll-form" method="POST" action="/questionnaire">
+      <div class="poll-header">
+        <span>Опитування</span>
+      </div>
+
+      <div class="poll-content">
+        <h2 id="question-text">Завантаження питання...</h2>
+        <div class="answers-container" id="answers"></div>
+      </div>
+
+      <div class="poll-footer">
+        <button type="button" class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()">Назад</button>
+        <button type="button" class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Далі</button>
+      </div>
+
+      <input type="hidden" name="answers_json" id="answers_json">
+    </form>
+  </div>
+
+  <script>
+    const occupation = "{{ occupation }}";
+    let quest_completed = False
+    // const occupation = "military";
+    const allQuestions = {
+        'military': [
+        {
+            text: "Чи вважаєте ви, що психолог має мати військовий досвід?",
+            options: ["Так", "Ні"],
+            name: "military_exp"
+        },
+        { 
+            text: "Чи готові ви займатися офлайн?",
+            options: ["Так", "Ні"],
+            name: "format"
+        },
+        { 
+            text: "Якою мовою вам зручніше спілкуватися?",
+            options: ["Українська", "Англійська"],
+            name: "lang"
+        },
+        { 
+            text: "Чи хочете ви брати участь у різних активностях з ветеранами?",
+            options: ["Так", "Ні", "Все одно"],
+            name: "activities"
+        },
+        {
+            text: "Вік психолога:",
+            options: ["До 30", "30–50", "50+"],
+            name: "age"
+        }
+        ],
+        psychologist: [
+        {
+            text: "ЛОХ",
+            options: ["До 30", "30–50", "50+"],
+            name: "age"
+        }
+    ]
+    
+};
+    
+    let questions = allQuestions[occupation];
+    quest_completed = True
+    let current = 0;
+    const answers = {};
+
+    function renderQuestion() {
+      const q = questions[current];
+      document.getElementById("question-text").innerText = q.text;
+      const answersDiv = document.getElementById("answers");
+      answersDiv.innerHTML = "";
+
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "answer-button";
+        btn.innerText = opt;
+        
+        // If there's already an answer for this question, highlight it
+        if (answers[q.name] === opt) {
+          btn.classList.add("selected");
+        }
+        
+        btn.onclick = () => {
+          // Remove selected class from all buttons
+          document.querySelectorAll(".answer-button").forEach(button => {
+            button.classList.remove("selected");
+          });
+          
+          // Add selected class to clicked button
+          btn.classList.add("selected");
+
+          answers[q.name] = opt;
+        };
+        answersDiv.appendChild(btn);
+      });
+      
+      // Update button states
+      document.getElementById("prev-btn").disabled = current === 0;
+    }
+
+    function nextQuestion() {
+      const currentQuestion = questions[current];
+      
+      if (!answers[currentQuestion.name]) {
+        alert("Будь ласка, виберіть відповідь перед тим, як продовжити.");
+        return;
+      }
+      
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      } else {
+        document.getElementById("answers_json").value = JSON.stringify(answers);
+        document.getElementById("poll-form").submit();
+      }
+    }
+
+    function prevQuestion() {
+      if (current > 0) {
+        current--;
+        renderQuestion();
+      }
+    }
+
+    window.onload = renderQuestion;
+  </script>
+</body>
 </html>

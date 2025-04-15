@@ -3,6 +3,7 @@ import re
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
+import json
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -29,17 +30,22 @@ google = oauth.register(
     },
     api_base_url='https://www.googleapis.com/oauth2/v1/',
     userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid email profile'}
 )
+
 
 @app.route('/login/google')
 def google_login():
     redirect_uri = url_for('google_auth', _external=True)
     return google.authorize_redirect(redirect_uri)
-
+# треба прописати помилку, якщо не має акаунту
 @app.route('/auth/google')
 def google_auth():
-    token = google.authorize_access_token()
+    try:
+        token = google.authorize_access_token()
+    except Exception as e:
+        print("Помилка", e)
     user_info = google.get('userinfo').json()
     email = user_info['email']
     username = user_info.get('name', email.split('@')[0])
@@ -142,11 +148,6 @@ def calendar():
     occupation = user.occupation
     return render_template("calendar.html", occupation=occupation)
 
-@app.route("/questionnaire")
-def questions():
-    '''questionnaire page'''
-    return render_template("questions.html")
-
 @app.route("/profile")
 def profile():
     '''profile page'''
@@ -188,8 +189,6 @@ def v_approving():
     '''after sending event page'''
     return render_template('v-approving.html')
 
-
-
 @app.route("/validation", methods=["POST"])
 def validate_user():
     '''validates user'''
@@ -217,7 +216,7 @@ def validate_name(name):
     characters it should return false'''
     if not name:
         return None
-    regex = "^(?=.*[A-Za-z0-9])[A-Za-z0-9 _\-\.]{3,30}$"
+    regex = "^[A-Za-z0-9]{1,30}$"
     return re.fullmatch(regex, name) is not None
 
 def validate_email(email):
@@ -283,34 +282,27 @@ def save_user():
     if not validate_password_4(password):
         return render_template(page, error_message="Invalid password format: Minimum 1 small letter")
     #, at least one uppercase letter, one lowercase letter, one number and one special character    if not validate_password(password):
-        return render_template(page, error_message="Invalid password format")
+        # return render_template(page, error_message="Invalid password format")
 
     name = request.form.get("name")
     #single name, WITHOUT spaces, WITH special characters
     if name:
-        if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', name):
+        if not re.fullmatch('^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1, 30}$', name):
             # if occupation != 'military':
                 return render_template(page, error_message="Invalid name must be between 1-30")
     # no restriction to the size
     #single name, WITHOUT spaces, WITH special characters
-    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', name):
-        return render_template(page, error_message="Invalid name must be between 1-30")
     # no restriction to the size
     surname = request.form.get("surname")
     if surname:
-        if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', surname):
-            if occupation != 'military':
+        if not re.fullmatch('^[A-Za-z]$', surname):
+            return render_template(page, error_message="Invalid surname must be between 1- 30")
 
-                return render_template(page, error_message="Invalid surname must be between 1- 30")
-    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', surname):
-        return render_template(page, error_message="Invalid surname must be between 1- 30")
     bio = request.form.get("bio")
     if bio:
         if not re.fullmatch('^.{1,300}$', bio):
             if occupation != 'military':
                 return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
-    if not re.fullmatch('^.{1,300}$', bio):
-        return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number"))\
 if request.form.get("number") else None
 
@@ -320,11 +312,11 @@ if request.form.get("number") else None
     else:
         user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
     # changes    # changes
-    if not used(username) and validate_number(number) and validate_email(email) and validate_name(username) and validate_email(email) and \
+    if not used(username) and validate_email(email) and validate_name(username) and validate_email(email) and \
 validate_password_1(password) and validate_password_2(password) and validate_password_3(password)\
- and validate_password_4(password) and validate_name(username):
+ and validate_password_4(password):
         if not occupation == 'military':
-            if validate_number(number):
+            if validate_number(number) and validate_name(name):
                 add_to_db(user)
                 session["user"] = username
                 return redirect(url_for("main"))
@@ -375,6 +367,29 @@ def psychologist_list():
     # сортування
     psychologists_sorted = sorted(psychologists, key=lambda p: p.rating, reverse=True)
     return render_template("psychologists.html", psychologists=psychologists_sorted)
+
+@app.route("/questionnaire", methods=["GET", "POST"])
+def questionnaire():
+    user = Users.query.filter_by(username=session['user']).first()
+    # if request.method == "POST":
+    #     answers = json.loads(request.form["answers_json"])
+    #     print("Отримані відповіді:", answers)
+    #     q = Questionnaire.query.filter_by(user_id=user.id).first()
+    #     if not q:
+    #         q = Questionnaire(user_id=user.id)
+    #         db.session.add(q)
+
+    #     q.prefers_gender = answers.get("gender")
+    #     q.prefers_method = answers.get("method")
+    #     q.prefers_age_group = answers.get("age")
+    #     db.session.commit()
+
+    #     return redirect(url_for("main"))
+    
+    user = Users.query.filter_by(username=session['user']).first()
+    return render_template("questions.html", occupation=user.occupation)
+
+
 @app.route("/psychologist/<int:id>", methods=["GET", "POST"])
 def view_psychologist(id):
     user = Users.query.filter_by(username=session['user']).first()
@@ -391,7 +406,7 @@ def view_psychologist(id):
         db.session.commit()
         return redirect(url_for("psychologist_list"))
 
-    return render_template("view_psychologist.html", psychologist=psychologist)
+    return render_template("profile.html", psychologist=psychologist)
 
 def used(username):
     '''checks if name is already in use'''
