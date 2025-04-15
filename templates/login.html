@@ -101,6 +101,8 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+            position: relative;
+            margin-top: 100px;
         }
         input {
             width: 50%;
@@ -152,6 +154,7 @@
         left: 845px;
         align-items: flex-end;
         margin-bottom: 20px;
+        z-index: 10;
         }
 
         .switch-input {
@@ -204,21 +207,19 @@
         </div>
         <div class="right">
             <h3>beyond duty</h3>
-            <div class="switch">
-                <button>Маю аккаунт</button>
-                <button>Не маю аккаунт</button>
+            
+            <div class="toggle-container">
+                <input type="checkbox" id="account-toggle" class="switch-input" checked>
+                <label for="account-toggle" class="switch-label">
+                    <span class="left_sw">Я маю акаунт</span>
+                    <span class="right_sw">Я не маю акаунт</span>
+                </label>
             </div>
-            <form action="{{ url_for('validate_user') }}", method="POST">
+            
+            <form action="{{ url_for('validate_user') }}" method="POST">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="password" id="password" name="password" placeholder="Пароль" required>
                 <button class="login-button" type="submit">Увійти</button>
-                <div class="toggle-container">
-                    <input type="checkbox" id="account-toggle" class="switch-input" checked>
-                    <label for="account-toggle" class="switch-label">
-                        <span class="left_sw">Я маю акаунт</span>
-                        <span class="right_sw">Я не маю акаунт</span>
-                    </label>
-                </div>
             </form>
         </div>
     </div>
@@ -273,6 +274,5 @@
             }
         }
     </script>
-    
 </body>
 </html>
