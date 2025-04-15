@@ -200,18 +200,22 @@
       <span><strong>BEYOND DUTY</strong></span>
     </div>
     <nav class="nav-links">
-      <a href="#">Календар подій</a>
+      <a href="/calendar">Календар подій</a>
       <a href="#">Ваші психологи</a>
       <a href="#">Про проєкт</a>
-      <div class="avatar-small"></div>
-    </nav>
+      <a href="{{ url_for('profile', username=user.username) }}">
+        <div class="avatar-small" style="cursor: pointer;"></div>
+      </a>
+        </nav>
   </header>
 
   <main>
     <section class="hero-section">
       <img src="https://kartinki.pics/uploads/posts/2022-12/1672128608_kartinkin-net-p-kartinka-psikholog-i-klient-vkontakte-1.jpg" alt="Герой">
-      <button class="survey-btn">Пройти опитування</button>
-    </section>
+        <a href="{{ url_for('questions') }}">
+          <button class="survey-btn">Пройти опитування</button>
+        </a>
+        </section>
 
     <section class="top-psychologists">
       <h2>Топ наших психологів:</h2>

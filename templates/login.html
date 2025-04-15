@@ -198,12 +198,26 @@
         background-color: #6ec6c4;
         color: rgb(0, 0, 0);
         }
+        .back-button {
+            background: #a1a1a1;
+            color: white;
+            border: none;
+            padding: 10px 70px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .back-button:hover {
+            background: #646464;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="left">
-            <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTOuezAfk6-W6t8TqPM_reaCWsAD-E9RC-JvwZtVeuI3uVvKw3J" alt="Volunteer">
+            <img src="https://spacemag.com.ua/wp-content/uploads/2024/03/photo_2022-10-01_13-10-10.jpg" alt="Volunteer">
         </div>
         <div class="right">
             <h3>beyond duty</h3>
@@ -220,6 +234,9 @@
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="password" id="password" name="password" placeholder="Пароль" required>
                 <button class="login-button" type="submit">Увійти</button>
+            </form>
+            <form action="{{ url_for('start') }}" method="GET" style="margin-top: 10px;">
+                <button class="back-button" type="submit">Назад</button>
             </form>
         </div>
     </div>

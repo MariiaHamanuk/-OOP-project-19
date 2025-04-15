@@ -180,20 +180,20 @@
     <nav>
       <span>Календар подій</span>
       <span>Ваші психологи</span>
-      <span><img src="https://via.placeholder.com/30" alt="профіль"> Олександр ▾</span>
+      <span><img src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="профіль"> Олександр ▾</span>
     </nav>
   </header>
 
   <div class="profile-card">
     <div class="avatar-large"></div>
     <div class="bio-block">
-      <strong>Олександр Коваленко</strong>
-      ЗСУ, 2014–2022<br><br>
-      Ветеран, який пройшов непростий шлях на передовій, а тепер шукаю можливості допомагати іншим і працювати над власним відновленням. Був на 10 волонтерських подіях – від збору гуманітарної допомоги до реабілітаційних таборів для побратимів.
+      <strong>{{ user.username }}</strong>
+      <!-- ЗСУ, 2014–2022<br><br> -->
+      {{ user.bio }}
 
       <div class="profile-buttons">
-        <button>Налаштування</button>
-        <button>Домашня сторінка</button>
+        <button onclick="window.location.href='/settings'">Налаштування</button>
+        <button onclick="history.back()">Домашня сторінка</button>
       </div>
     </div>
   </div>
