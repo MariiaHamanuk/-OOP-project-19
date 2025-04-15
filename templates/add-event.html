@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <a href="{{ url_for('calendar') }}">
+        <button> X </button>
+    </a>
+    <h1>Подія</h1>
+    <form action="{{ url_for('add_event') }}" method="POST" enctype="multipart/form-data">
+        <label for="name"> назва події </label>
+        <br>
+        <input type="text" id="name" name="name" required>
+        <br>
+        <label for="description"> опис </label>
+        <br>
+        <input type="text" id="description" name="description" required>
+        <br>
+        <label for="date"> дата </label>
+        <br>
+        <input type="date" id="date" name="date" required>
+        <br>
+        <label for="time"> час </label>
+        <br>
+        <input type="time" id="time" name="time" step="60" required>
+        <br>
+        <button>submit</button>
+    </form>
+    {% if message %}
+    <p style="color: green;">{{ message }}</p>
+    {% endif %}
+</html>

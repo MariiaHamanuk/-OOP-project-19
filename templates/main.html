@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-    {% if occupation == "military" or occupation == "admin" %}
+    {% if occupation != "volunteer" %}
         <a href="{{ url_for('questions') }}">
-            <button> Опитувальник </button>
+            <button> Пройти опитування </button>
         </a>
     {% endif %}
     <a href="{{ url_for('calendar') }}">
@@ -14,21 +14,16 @@
     <a href="{{ url_for('settings') }}">
         <button> Настройки </button>
     </a>
+    {% if occupation == "admin" %}
+        <a href="{{ url_for('verify_page') }}">
+            <button> Верифікація користувачів і подій </button>
+        </a>
+    {% endif %}
     <a href="{{ url_for('logout_page') }}">
         <button> Вийти </button>
     </a>
 
     <h1>BEYOND DUTY</h1>
-    <a href="{{ url_for('psychologist_list') }}">
-        <button>Переглянути психологів</button>
-      </a>
-      <li style="margin-bottom: 20px;">
-        <strong>{{ p.name }} {{ p.surname }}</strong><br>
-        <i>{{ p.bio }}</i><br>
-        
-        <b>Рейтинг:</b> {{ p.rating }}<br>
-        <a href="{{ url_for('view_psychologist', id=p.id) }}">Оцінити</a>
-      </li>
     <h3>Топ психологів</h3>
 
     {% if top %}

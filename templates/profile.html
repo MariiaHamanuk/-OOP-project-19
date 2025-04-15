@@ -4,7 +4,27 @@
         <button> << </button>
     </a>
     <a href="{{ url_for('settings') }}">
-        <button> Настройки </button>
+        <button> Редагувати профіль </button>
+    </a>
+    <!-- мені треба зробити так аби мілітарі бачив психолога профіль це скоріше за все треба зробити окремо порадитися з Нестором -->
+    <a {%if occupation = 'psychologist'%}>
+        <h1>Психолог: {{ psychologist.name }} {{ psychologist.surname }}</h1>
+        <p><strong>Біо:</strong> {{ psychologist.bio or "Немає опису." }}</p>
+        <p><strong>Поточний рейтинг:</strong> {{ psychologist.rating or 0 }}</p>
+
+        <h2>Оцініть цього психолога:</h2>
+        <form method="POST">
+            <div class="star-rating">
+                {% for i in range(5, 0, -1) %}
+                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+                    <label for="star{{ i }}">★</label>
+                {% endfor %}
+            </div>
+            <br><br>
+            <button type="submit">Надіслати оцінку</button>
+        </form>
+
+        <br><a href="{{ url_for('psychologist_list') }}">← Назад до списку</a>
     </a>
     <h1> Профіль ;pp</h1>
 </html>
