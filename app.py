@@ -252,6 +252,32 @@ def validate_number(number):
 #all of the regex functions
 
 
+#all of the regex functions
+def validate_name(name):
+    ''' complitad regex for username min. 3 char and max. 30, special
+    characters can be allowed, if all characters are only special 
+    characters it should return false'''
+    regex = "^(?=.*[A-Za-z0-9]).{3,30}$"
+    return re.fullmatch(regex, name) is not None
+
+def validate_email(email):
+    '''regex for email'''
+    regex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    return re.fullmatch(regex, email) is not None
+
+def validate_password(password):
+    '''Minimum eight and maximum 10 characters, at least one
+    uppercase letter, one lowercase letter, one number and one special character:'''
+    regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$"
+    return re.fullmatch(regex, password) is not None
+
+def validate_number(number):
+    '''must be checked '''
+    regex = "^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$"
+    return re.fullmatch(regex, number) is not None
+#all of the regex functions
+
+
 @app.route("/save", methods=["POST"])
 def save_user():
     '''saves user to file'''
@@ -282,7 +308,9 @@ def save_user():
         return render_template(page, error_message="Invalid password format: Minimum 1 Big letter")
     if not validate_password_4(password):
         return render_template(page, error_message="Invalid password format: Minimum 1 small letter")
-    #, at least one uppercase letter, one lowercase letter, one number and one special character
+    #, at least one uppercase letter, one lowercase letter, one number and one special character    if not validate_password(password):
+        return render_template(page, error_message="Invalid password format")
+
     name = request.form.get("name")
     #single name, WITHOUT spaces, WITH special characters
     if name:
@@ -290,17 +318,25 @@ def save_user():
             # if occupation != 'military':
                 return render_template(page, error_message="Invalid name must be between 1-30")
     # no restriction to the size
+    #single name, WITHOUT spaces, WITH special characters
+    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', name):
+        return render_template(page, error_message="Invalid name must be between 1-30")
+    # no restriction to the size
     surname = request.form.get("surname")
     if surname:
         if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', surname):
             if occupation != 'military':
 
                 return render_template(page, error_message="Invalid surname must be between 1- 30")
+    if not re.fullmatch('^[A-Za-z]+(((\'|\-|\.)?([A-Za-z])+))?$', surname):
+        return render_template(page, error_message="Invalid surname must be between 1- 30")
     bio = request.form.get("bio")
     if bio:
         if not re.fullmatch('^.{1,300}$', bio):
             if occupation != 'military':
                 return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
+    if not re.fullmatch('^.{1,300}$', bio):
+        return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number"))\
 if request.form.get("number") else None
 
@@ -309,8 +345,8 @@ if request.form.get("number") else None
 
     else:
         user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
-    # changes
-    if not used(username) and validate_email(email) and \
+    # changes    # changes
+    if not used(username) and validate_number(number) and validate_email(email) and validate_password(password) and validate_name(username) and validate_email(email) and \
 validate_password_1(password) and validate_password_2(password) and validate_password_3(password)\
  and validate_password_4(password) and validate_name(username):
         if not occupation == 'military':
@@ -322,7 +358,6 @@ validate_password_1(password) and validate_password_2(password) and validate_pas
             add_to_db(user)
             session["user"] = username
             return redirect(url_for("main"))
-
     return render_template(page, error_message="Account with this username already exists")
 
 class Rating(db.Model):

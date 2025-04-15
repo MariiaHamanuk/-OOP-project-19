@@ -17,6 +17,8 @@
         <input type="password" id="password" name="password" required>
         <br>
         <button>submit</button>
+        <!-- you can delete next thing if something wrong -->
+        <a href="{{ url_for('google_login') }}">Зайти через Google</a>
         <br>
     </form>
     {% if error_message %}
