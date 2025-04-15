@@ -320,7 +320,7 @@ if request.form.get("number") else None
     else:
         user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
     # changes    # changes
-    if not used(username) and validate_number(number) and validate_email(email) and validate_password(password) and validate_name(username) and validate_email(email) and \
+    if not used(username) and validate_number(number) and validate_email(email) and validate_name(username) and validate_email(email) and \
 validate_password_1(password) and validate_password_2(password) and validate_password_3(password)\
  and validate_password_4(password) and validate_name(username):
         if not occupation == 'military':
