@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- маю проблеми з переходом по покликанням зверху -->
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
@@ -24,6 +23,9 @@
       align-items: center;
       padding: 15px 50px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .logo {
@@ -54,6 +56,11 @@
     .nav-link {
       text-decoration: none;
       color: #666;
+      transition: color 0.2s;
+    }
+    
+    .nav-link:hover {
+      color: #1e3a78;
     }
 
     .profile-link {
@@ -157,19 +164,39 @@
     .btn:hover {
       opacity: 0.9;
     }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: #eee;
+      margin-bottom: 20px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background-color: #50c6c2;
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
   <nav class="navbar">
-    <a href="#" class="logo">
+    <a href="/" class="logo">
       <div class="logo-circle"></div>
       <span class="logo-text">BEYOND DUTY</span>
     </a>
     <div class="nav-links">
-      <a href="#" class="nav-link">Календар подій</a>
-      <a href="#" class="nav-link">Ваші психологи</a>
-      <a href="#" class="profile-link">
-        <span>Олександр</span>
+      <a href="/events" class="nav-link">Календар подій</a>
+      <a href="/psychologists" class="nav-link">Ваші психологи</a>
+      <a href="/profile" class="profile-link">
+        <span id="user-name">Олександр</span>
         <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
           <path d="M1 1L6 5L11 1" stroke="#666" stroke-width="1.5"/>
         </svg>
@@ -178,71 +205,114 @@
   </nav>
 
   <div class="container">
-    <form id="poll-form" method="POST" action="/questionnaire">
+    <form id="poll-form" method="POST" action="/api/submit-questionnaire">
       <div class="poll-header">
         <span>Опитування</span>
       </div>
 
       <div class="poll-content">
+        <div class="progress-bar">
+          <div class="progress" id="progress-indicator"></div>
+        </div>
         <h2 id="question-text">Завантаження питання...</h2>
         <div class="answers-container" id="answers"></div>
       </div>
 
       <div class="poll-footer">
-        <button type="button" class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()">Назад</button>
-        <button type="button" class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Далі</button>
+        <button type="button" class="btn btn-secondary" id="prev-btn" disabled>Назад</button>
+        <button type="button" class="btn btn-primary" id="next-btn">Далі</button>
+        <button type="submit" class="btn btn-primary" id="submit-btn" style="display: none;">Завершити</button>
       </div>
 
+      <input type="hidden" name="user_id" id="user_id">
+      <input type="hidden" name="occupation" id="occupation">
       <input type="hidden" name="answers_json" id="answers_json">
     </form>
   </div>
 
   <script>
-    const occupation = "{{ occupation }}";
-    let quest_completed = False
-    // const occupation = "military";
+    // Get user info from URL or localStorage
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('user_id') || localStorage.getItem('userId') || '';
+    const occupation = params.get('occupation') || localStorage.getItem('occupation') || 'military';
+    
+    // Set hidden form values
+    document.getElementById('user_id').value = userId;
+    document.getElementById('occupation').value = occupation;
+    
+    // If user name is available in local storage, display it
+    const storedName = localStorage.getItem('userName');
+    if (storedName) {
+      document.getElementById('user-name').textContent = storedName;
+    }
+    
+    // Define questions for different occupations
     const allQuestions = {
-        'military': [
+      'military': [
         {
-            text: "Чи вважаєте ви, що психолог має мати військовий досвід?",
-            options: ["Так", "Ні"],
-            name: "military_exp"
+          text: "Чи вважаєте ви, що психолог має мати військовий досвід?",
+          options: ["Так", "Ні"],
+          name: "military_exp"
         },
         { 
-            text: "Чи готові ви займатися офлайн?",
-            options: ["Так", "Ні"],
-            name: "format"
+          text: "Чи готові ви займатися офлайн?",
+          options: ["Так", "Ні"],
+          name: "format"
         },
         { 
-            text: "Якою мовою вам зручніше спілкуватися?",
-            options: ["Українська", "Англійська"],
-            name: "lang"
+          text: "Якою мовою вам зручніше спілкуватися?",
+          options: ["Українська", "Англійська"],
+          name: "lang"
         },
         { 
-            text: "Чи хочете ви брати участь у різних активностях з ветеранами?",
-            options: ["Так", "Ні", "Все одно"],
-            name: "activities"
+          text: "Чи хочете ви брати участь у різних активностях з ветеранами?",
+          options: ["Так", "Ні", "Все одно"],
+          name: "activities"
         },
         {
-            text: "Вік психолога:",
-            options: ["До 30", "30–50", "50+"],
-            name: "age"
+          text: "Вік психолога:",
+          options: ["До 30", "30–50", "50+", "Не має значення"],
+          name: "age"
         }
-        ],
-        psychologist: [
+      ],
+      'psychologist': [
         {
-            text: "ЛОХ",
-            options: ["До 30", "30–50", "50+"],
-            name: "age"
+          text: "Чи маєте ви досвід роботи з військовими?",
+          options: ["Так", "Ні"],
+          name: "military_exp"
+        },
+        {
+          text: "Чи готові ви працювати офлайн?",
+          options: ["Так", "Ні", "Обидва варіанти"],
+          name: "format"
+        },
+        {
+          text: "Якими мовами ви можете надавати консультації?",
+          options: ["Тільки українська", "Українська та англійська", "Інші"],
+          name: "lang"
+        },
+        {
+          text: "Чи готові ви проводити групові сесії?",
+          options: ["Так", "Ні", "За потреби"],
+          name: "group_sessions"
+        },
+        {
+          text: "Скільки років досвіду у вас є?",
+          options: ["До 3 років", "3-10 років", "Більше 10 років"],
+          name: "experience"
         }
-    ]
+      ]
+    };
     
-};
-    
-    let questions = allQuestions[occupation];
-    quest_completed = True
+    // Use the appropriate question set based on occupation
+    let questions = allQuestions[occupation] || allQuestions['military'];
     let current = 0;
     const answers = {};
+
+    function updateProgressBar() {
+      const progress = ((current + 1) / questions.length) * 100;
+      document.getElementById('progress-indicator').style.width = `${progress}%`;
+    }
 
     function renderQuestion() {
       const q = questions[current];
@@ -256,7 +326,6 @@
         btn.className = "answer-button";
         btn.innerText = opt;
         
-        // If there's already an answer for this question, highlight it
         if (answers[q.name] === opt) {
           btn.classList.add("selected");
         }
@@ -275,8 +344,12 @@
         answersDiv.appendChild(btn);
       });
       
-      // Update button states
+      // Update buttons and progress
       document.getElementById("prev-btn").disabled = current === 0;
+      document.getElementById("next-btn").style.display = current < questions.length - 1 ? "block" : "none";
+      document.getElementById("submit-btn").style.display = current === questions.length - 1 ? "block" : "none";
+      
+      updateProgressBar();
     }
 
     function nextQuestion() {
@@ -290,9 +363,6 @@
       if (current < questions.length - 1) {
         current++;
         renderQuestion();
-      } else {
-        document.getElementById("answers_json").value = JSON.stringify(answers);
-        document.getElementById("poll-form").submit();
       }
     }
 
@@ -302,8 +372,52 @@
         renderQuestion();
       }
     }
+    
+    // Event handlers
+    document.getElementById("next-btn").addEventListener("click", nextQuestion);
+    document.getElementById("prev-btn").addEventListener("click", prevQuestion);
+    
+    document.getElementById("poll-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      const currentQuestion = questions[current];
+      if (!answers[currentQuestion.name]) {
+        alert("Будь ласка, виберіть відповідь перед завершенням.");
+        return;
+      }
+      
+      // Prepare data for submission
+      document.getElementById("answers_json").value = JSON.stringify(answers);
+      
+      // Submit the form with fetch API
+      fetch(this.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: document.getElementById("user_id").value,
+          occupation: document.getElementById("occupation").value,
+          answers: answers
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok');
+      })
+      .then(data => {
+        // Redirect to results or thank you page
+        window.location.href = `/results?id=${data.id || ''}`;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Сталася помилка при відправці даних. Спробуйте ще раз.');
+      });
+    });
 
-    window.onload = renderQuestion;
+    window.addEventListener('load', renderQuestion);
   </script>
 </body>
 </html>

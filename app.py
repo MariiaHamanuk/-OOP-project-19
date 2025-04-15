@@ -287,7 +287,7 @@ def save_user():
     name = request.form.get("name")
     #single name, WITHOUT spaces, WITH special characters
     if name:
-        if not re.fullmatch('^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1, 30}$', name):
+        if not re.fullmatch('^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', name):
             # if occupation != 'military':
                 return render_template(page, error_message="Invalid name must be between 1-30")
     # no restriction to the size
@@ -295,12 +295,12 @@ def save_user():
     # no restriction to the size
     surname = request.form.get("surname")
     if surname:
-        if not re.fullmatch('^[A-Za-z]$', surname):
+        if not re.fullmatch('^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', surname):
             return render_template(page, error_message="Invalid surname must be between 1- 30")
 
     bio = request.form.get("bio")
     if bio:
-        if not re.fullmatch('^.{1,300}$', bio):
+        if not re.fullmatch('^.{1,500}$', bio):
             if occupation != 'military':
                 return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number"))\
@@ -369,7 +369,7 @@ def psychologist_list():
     return render_template("psychologists.html", psychologists=psychologists_sorted)
 
 @app.route("/questionnaire", methods=["GET", "POST"])
-def questionnaire():
+def questions():
     user = Users.query.filter_by(username=session['user']).first()
     # if request.method == "POST":
     #     answers = json.loads(request.form["answers_json"])
