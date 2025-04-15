@@ -252,32 +252,6 @@ def validate_number(number):
 #all of the regex functions
 
 
-#all of the regex functions
-def validate_name(name):
-    ''' complitad regex for username min. 3 char and max. 30, special
-    characters can be allowed, if all characters are only special 
-    characters it should return false'''
-    regex = "^(?=.*[A-Za-z0-9]).{3,30}$"
-    return re.fullmatch(regex, name) is not None
-
-def validate_email(email):
-    '''regex for email'''
-    regex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-    return re.fullmatch(regex, email) is not None
-
-def validate_password(password):
-    '''Minimum eight and maximum 10 characters, at least one
-    uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$"
-    return re.fullmatch(regex, password) is not None
-
-def validate_number(number):
-    '''must be checked '''
-    regex = "^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$"
-    return re.fullmatch(regex, number) is not None
-#all of the regex functions
-
-
 @app.route("/save", methods=["POST"])
 def save_user():
     '''saves user to file'''
