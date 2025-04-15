@@ -43,6 +43,50 @@
             margin: 0;
             background-color: #222;
         }
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 50px;
+            margin-right: 10px;
+        }
+        .logo-text {
+            color: #1e3a78;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .language-switch {
+            display: flex;
+            align-items: center;
+            margin-right: 30px;
+        }
+        .language-option {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .active-language {
+            background-color: #6ec6c4;
+            color: white;
+        }
+        .inactive-language {
+            color: #1e3a78;
+        }
+
         .container {
             display: flex;
             width: 100vw;
