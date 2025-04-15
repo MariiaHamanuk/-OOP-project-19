@@ -33,7 +33,7 @@ class Users(db.Model):
     picture = db.Column(db.LargeBinary)
     rating = db.Column(db.Float)
 
-    events = db.relationship('Events', backref='users', lazy=True)
+    events = db.relationship('Events', back_populates='user', lazy=True)
 
     def __init__(self, occupation, username, email, number, name, \
 surname, bio, password, verified=True, rating=None):
@@ -62,6 +62,8 @@ class Events(db.Model):
     time = db.Column(db.String(10), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
+    user = db.relationship('Users', back_populates='events')
+
     def __init__(self, title, description, date, time, user_id, accepted=False):
         '''for positional arguments'''
         self.title = title
@@ -73,9 +75,9 @@ class Events(db.Model):
         self.user_id = user_id
         self.accepted = accepted
 
-class Preferences(db.Model):
-    '''Preferences table'''
-    id = db.Column(db.Integer, primary_key=True)
+# class Preferences(db.Model):
+#     '''Preferences table'''
+#     id = db.Column(db.Integer, primary_key=True)
 
 @app.before_request
 def restricted_pages():
@@ -218,9 +220,9 @@ if request.form.get("number") else None
             page = "v_register"
 
     if not used(username):
+        add_to_db(user)
         if occupation == "psychologist":
             return redirect(url_for("waiting_page"))
-        add_to_db(user)
         session["user"] = username
         return redirect(url_for("main"))
 
@@ -263,6 +265,8 @@ def waiting():
 def add_event_page():
     '''add event page'''
     message = request.args.get('message')
+    auto_verify()
+    events_autodeletion()
     return render_template("add-event.html", message=message)
 
 @app.route("/save-event", methods=["POST"])
@@ -341,10 +345,21 @@ def verify_manual():
             message = "Invalid event name"
     return redirect(url_for('verify_page', message=message))
 
-
+def events_autodeletion():
+    '''deletes expired events'''
+    events = Events.query.all()
+    for event in events:
+        year, month, day = list(map(int, event.date.split("-")))
+        if datetime(year, month, day).date() < datetime.now().date():
+            db.session.delete(event)
+            db.session.commit()
 
 def auto_verify():
-    pass
+    '''auto verification'''
+    user = Users.query.filter_by(username=session["user"]).first()
+
+    if sum(1 for event in user.events if event.accepted):
+        user.verified = True
 
 @app.route("/update-info", methods=["POST"])
 def update_info():

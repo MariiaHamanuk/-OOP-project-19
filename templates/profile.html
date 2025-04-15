@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html>
-    <a href="{{ url_for('main') }}">
-        <button> << </button>
-    </a>
-    <a href="{{ url_for('settings') }}">
-        <button> Редагувати профіль </button>
-    </a>
+        <a href="{{ url_for('main') }}">
+            <button> << </button>
+        </a>
+    {% if user.username == session["user"] %}
+        <a href="{{ url_for('settings') }}">
+            <button> Редагувати профіль </button>
+        </a>
+    {% endif %}
     <h1>{{ user.username }}</h1>
     {% if user.username == session["user"] %}
-        {% if user.surname %}
-            <h2>{{user.surname}}</h2>
-        {% endif %}
-        {% if user.name %}
-            <h2>{{user.name}}</h2>
-        {% endif %}
         {% if user.email %}
             <h3>{{user.email}}</h3>
         {% endif %}
         {% if user.number %}
             <h3>{{user.number}}</h3>
         {% endif %}
+    {% endif %}
+    {% if user.surname %}
+        <h3>{{user.surname}}</h3>
+    {% endif %}
+    {% if user.name %}
+        <h3>{{user.name}}</h3>
     {% endif %}
     {% if user.bio %}
         <h5>{{user.bio}}</h5>
