@@ -187,15 +187,16 @@
                 <button>Не маю аккаунт</button>
             </div>
             <form action="/register" method="POST">
-                <input type="text" name="name" placeholder="Ваше ім'я" required>
-                <input type="text" name="surname" placeholder="Ваше прізвище" required>
-                <input type="tel" name="number" placeholder="Ваш номер" required>
-                <input type="email" name="email" placeholder="Ваш email" required>
-                <input type="text" name="description" placeholder="Розкажіть про ваш волонтерський довсвід" required>
-                <input type="password" name="password" placeholder="Пароль" required>
+                <input type="hidden" id="occupation" name="occupation" value="volunteer">
+                <input type="text" id="name" name="name" placeholder="Ваше ім'я" required>
+                <input type="text" id="surname" name="surname" placeholder="Ваше прізвище" required>
+                <input type="text" id="username" name="username" placeholder="username" required>
+                <input type="email" id="email" name="email" placeholder="Ваш email" required>
+                <input type="text" id="bio" name="bio" placeholder="Розкажіть про ваш волонтерський довсвід" required>
+                <input type="password" id="password" name="password" placeholder="Пароль" required>
                 <button class="login-button" type="submit">Надіслати</button>
                 <div class="toggle-container">
-                    <input type="checkbox" id="account-toggle" class="switch-input">
+                    <input type="checkbox" id="account-toggle" class="switch-input" checked>
                     <label for="account-toggle" class="switch-label">
                         <span class="left_sw">Я маю акаунт</span>
                         <span class="right_sw">Я не маю акаунт</span>
@@ -204,5 +205,37 @@
             </form>
         </div>
     </div>
+    <script>
+        const checkbox = document.getElementById("account-toggle");
+        const leftSw = document.querySelector(".left_sw");
+        const rightSw = document.querySelector(".right_sw");
+
+        window.addEventListener("DOMContentLoaded", function () {
+            const savedState = localStorage.getItem("accountToggleChecked");
+            checkbox.checked = savedState === "true";
+            updateSwitchStyles();
+        });
+
+        checkbox.addEventListener("change", function () {
+            localStorage.setItem("accountToggleChecked", this.checked);
+            if (!this.checked) {
+                window.location.href = "/login";
+            }
+        });
+
+        function updateSwitchStyles() {
+            if (checkbox.checked) {
+                leftSw.style.backgroundColor = "#6ec6c4";
+                leftSw.style.color = "black";
+                rightSw.style.backgroundColor = "#4b9391";
+                rightSw.style.color = "white";
+            } else {
+                leftSw.style.backgroundColor = "#4b9391";
+                leftSw.style.color = "white";
+                rightSw.style.backgroundColor = "#6ec6c4";
+                rightSw.style.color = "black";
+            }
+        }
+    </script>
 </body>
 </html>

@@ -208,12 +208,12 @@
                 <button>Маю аккаунт</button>
                 <button>Не маю аккаунт</button>
             </div>
-            <form action="/register" method="POST">
-                <input type="text" name="username" placeholder="Ваше ім'я" required>
-                <input type="password" name="password" placeholder="Пароль" required>
+            <form action="{{ url_for('validate_user') }}", method="POST">
+                <input type="text" id="username" name="username" placeholder="username" required>
+                <input type="password" id="password" name="password" placeholder="Пароль" required>
                 <button class="login-button" type="submit">Login</button>
                 <div class="toggle-container">
-                    <input type="checkbox" id="account-toggle" class="switch-input">
+                    <input type="checkbox" id="account-toggle" class="switch-input" checked>
                     <label for="account-toggle" class="switch-label">
                         <span class="left_sw">Я маю акаунт</span>
                         <span class="right_sw">Я не маю акаунт</span>
@@ -222,5 +222,57 @@
             </form>
         </div>
     </div>
+    <script>
+        const checkbox = document.getElementById("account-toggle");
+        const leftSw = document.querySelector(".left_sw");
+        const rightSw = document.querySelector(".right_sw");
+    
+        // Встановити стан світчера з localStorage при завантаженні
+        window.addEventListener("DOMContentLoaded", function () {
+            const savedState = localStorage.getItem("accountToggleChecked");
+            if (savedState === "true") {
+                checkbox.checked = true;
+            } else {
+                checkbox.checked = false;
+            }
+    
+            updateSwitchStyles();
+        });
+    
+        checkbox.addEventListener("change", function () {
+            localStorage.setItem("accountToggleChecked", this.checked);
+    
+            if (this.checked) {
+                const occupation = localStorage.getItem("occupation");
+    
+                if (occupation === "military") {
+                    window.location.href = "/sign-in-military";
+                } else if (occupation === "psychologist") {
+                    window.location.href = "/sign-in-psychologist";
+                } else if (occupation === "volunteer") {
+                    window.location.href = "/sign-in-volunteer";
+                } else {
+                    window.location.href = "/sign-in-military"; 
+                }
+            }
+    
+            updateSwitchStyles();
+        });
+    
+        function updateSwitchStyles() {
+            if (checkbox.checked) {
+                leftSw.style.backgroundColor = "#6ec6c4";
+                leftSw.style.color = "black";
+                rightSw.style.backgroundColor = "#4b9391";
+                rightSw.style.color = "white";
+            } else {
+                leftSw.style.backgroundColor = "#4b9391";
+                leftSw.style.color = "white";
+                rightSw.style.backgroundColor = "#6ec6c4";
+                rightSw.style.color = "black";
+            }
+        }
+    </script>
+    
 </body>
 </html>
