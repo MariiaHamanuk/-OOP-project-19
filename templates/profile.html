@@ -9,24 +9,12 @@
         </a>
     {% endif %}
     <h1>{{ user.username }}</h1>
-    {% if user.username == session["user"] %}
-        {% if user.email %}
-            <h3>{{user.email}}</h3>
-        {% endif %}
-        {% if user.number %}
-            <h3>{{user.number}}</h3>
-        {% endif %}
-    {% endif %}
-    {% if user.surname %}
-        <h3>{{user.surname}}</h3>
-    {% endif %}
-    {% if user.name %}
-        <h3>{{user.name}}</h3>
-    {% endif %}
+    <h4>{{ "{} {}".format(user.email, user.number if user.number else "")}}</h4>
+    <h3>{{ "{} {}".format(user.name if user.name else "", user.surname if user.surname else "")}}</h3>
     {% if user.bio %}
-        <h5>{{user.bio}}</h5>
+        <h4>{{user.bio}}</h4>
     {% endif %}
     {% if user.occupation == "psychologist" %}
-        <h>{{user.rating}}</h4>
+        <h3>{{user.rating}}</h3>
     {% endif %}
 </html>
