@@ -64,7 +64,7 @@
 </head>
 <body>
   <header class="top-bar">
-    <button class="back-btn" onclick="window.location.href='/main'">&#8592;</button>
+    <button class="back-btn" onclick="history.back()">&#8592;</button>
     <div class="header-title">
       <div class="circle"></div>
       <h1>КАЛЕНДАР</h1>
@@ -137,6 +137,21 @@
     .submit-button:hover {
       background-color: #4b9391;
     }
+    .back-to-main-button {
+    width: 50%;
+    padding: 10px;
+    background-color: #a1a1a1;
+    margin: 10px 0;
+    border: 1px solid #a1a1a1;
+    border-radius: 15px;
+    color: #000000;
+    cursor: pointer;
+  }
+
+  .back-to-main-button:hover {
+    background-color: #646464;
+  }
+
   </style>
   
 
@@ -169,10 +184,12 @@
         <label for="time">Час:</label><br>
         <input type="time" id="time" name="time" required><br><br>
 
-        <button class="submit-button" type="submit">Додати подію</button>
+        <button class="submit-button" type="submit">Додати подію</button>      
     </form>
 {% endif %}
-
+<form action="{{ url_for('main') }}" method="get">
+  <button class="back-to-main-button" type="submit">На головну</button>
+</form>
 </div>
 
 <footer>

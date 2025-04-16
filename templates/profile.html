@@ -12,6 +12,12 @@
       box-sizing: border-box;
     }
 
+    html, body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background-color: #fff;
@@ -48,11 +54,21 @@
       font-weight: 400;
     }
 
-    nav img {
+    nav .profile-button {
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    nav .profile-button img {
       width: 30px;
       height: 30px;
       border-radius: 50%;
-      vertical-align: middle;
+    }
+
+    .main-content {
+      flex: 1;
     }
 
     .profile-card {
@@ -69,9 +85,11 @@
       width: 160px;
       height: 160px;
       border-radius: 50%;
-      background-color: #ccc;
       flex-shrink: 0;
       margin-right: 40px;
+      background-image: url('https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg');
+      background-size: cover;
+      background-position: center;
     }
 
     .bio-block {
@@ -80,7 +98,7 @@
       border-radius: 10px;
       color: #0A1D4E;
       flex-grow: 1;
-      margin-right: 20px; /* додали відступ справа */
+      margin-right: 20px;
     }
 
     .bio-block strong {
@@ -178,38 +196,48 @@
       BEYOND DUTY
     </div>
     <nav>
-      <span>Календар подій</span>
-      <span>Ваші психологи</span>
-      <span><img src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="профіль"> Олександр ▾</span>
+      <a href="/calendar" style="text-decoration: none; color: inherit;">Календар подій</a>
+      {% if user.occupation == "military" %}
+        <span>Ваші психологи</span>
+      {% endif %}
+      <button class="profile-button">
+        <img src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="профіль">
+      </button>
     </nav>
+    
   </header>
 
-  <div class="profile-card">
-    <div class="avatar-large"></div>
-    <div class="bio-block">
-      <strong>{{ user.username }}</strong>
-      <!-- ЗСУ, 2014–2022<br><br> -->
-      {{ user.bio }}
-
-      <div class="profile-buttons">
-        <button onclick="window.location.href='/settings'">Налаштування</button>
-        <button onclick="history.back()">Домашня сторінка</button>
+  <main class="main-content">
+    <div class="profile-card">
+      <div class="avatar-large"></div>
+      <div class="bio-block">
+        <strong>{{ user.username }}</strong>
+        {{ user.bio }}
+        <div class="profile-buttons">
+          <button onclick="window.location.href='/settings'">Налаштування</button>
+          <button onclick="window.location.href='/main'">Домашня сторінка</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="section">
-    <h3>Мої психологи:</h3>
-    <img src="https://images.unsplash.com/photo-1611042553484-75f3e75b5e2b?auto=format&fit=crop&w=500&q=80" alt="психолог">
-  </div>
-
-  <div class="section">
-    <h3>Нещодавно відвідані події:</h3>
-    <div class="recent-events">
-      <div class="event-card"></div>
-      <div class="event-card"></div>
+    <div class="section">
+      {% if user.occupation == "military" %}
+        <h3>Мої психологи:</h3>
+        <img src="https://images.unsplash.com/photo-1611042553484-75f3e75b5e2b?auto=format&fit=crop&w=500&q=80" alt="психолог">
+      {% endif %}
     </div>
-  </div>
+
+    <div class="section">
+      <h3>Нещодавно відвідані події:</h3>
+      <div class="recent-events">
+        {% for event in user.recent_events %}
+          <div class="event-card">
+            <img src="{{ event.image_url }}" alt="{{ event.title }}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
 
   <footer>
     <strong>Beyond Duty</strong><br>
