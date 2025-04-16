@@ -142,7 +142,7 @@
 
 <form method="POST" action="{{ url_for('delete_account') }}" onsubmit="return confirm('Ви впевнені, що хочете видалити акаунт? Цю дію не можна скасувати.');">
   <label for="delete_password">Підтвердіть пароль для видалення акаунту:</label><br>
-  <input type="password" id="delete_password" name="password" required><br>
+  <input type="password" id="delete_password" name="password" placeholder="*обов'язково"><br>
   <button type="submit" class="submit-button" style="background-color: #d9534f; border-color: #d9534f;">
     Видалити акаунт
   </button>
