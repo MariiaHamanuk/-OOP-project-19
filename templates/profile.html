@@ -222,13 +222,24 @@
       <div class="avatar-large"></div>
       <div class="bio-block">
         <strong>{{ user.username }}</strong>
-        {{ user.bio }}
+      
+        {% if user.occupation == "psychologist" or user.occupation == "volunteer" %}
+          <strong>Прізвище та Ім'я:</strong> {{ user.surname }} {{ user.surname }}<br>
+          <strong></strong>
+          <strong>Телефон:</strong> {{ user.number }}<br>
+          <strong></strong>
+          <strong>Email:</strong> {{ user.email }}<br>
+        {% endif %}
+        <strong></strong>
+        <strong>Біографія:</strong><p>{{ user.bio }}</p>
+      
         <div class="profile-buttons">
           <button onclick="window.location.href='/settings'">Налаштування</button>
           <button onclick="window.location.href='/main'">Домашня сторінка</button>
           <button class="profile-button logout" onclick="window.location.href='/logout'">Вийти</button>
         </div>
       </div>
+      
     </div>
 
     <div class="section">
