@@ -195,7 +195,7 @@
     <div class="nav-links">
       <a href="{{ url_for('calendar') }}">Календар подій</a>
       <a href="/psychologists">Ваші психологи</a>
-      <a href="{{ url_for('profile') }}">
+      <a href="{{ url_for('profile', username=session['user']) }}">
         <span id="user-name">Олександр</span>
         <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
           <path d="M1 1L6 5L11 1" stroke="#666" stroke-width="1.5"/>
@@ -235,7 +235,7 @@
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user_id') || localStorage.getItem('userId') || '';
     // const occupation = document.body.dataset.occupation || 'military'
-    const occupation = "{{ occupation }}"
+    const occupation = "{{ user.occupation }}"
     // Set hidden form values
     document.getElementById('user_id').value = userId;
     document.getElementById('occupation').value = occupation;
@@ -262,7 +262,7 @@
         { 
           text: "Якою мовою вам зручніше спілкуватися?",
           options: ["Українська", "Англійська"],
-          name: "lang"
+          name: "language"
         },
         { 
           text: "Чи хочете ви брати участь у різних активностях з ветеранами?",
@@ -283,23 +283,18 @@
         },
         {
           text: "Чи готові ви працювати офлайн?",
-          options: ["Так", "Ні", "Обидва варіанти"],
+          options: ["Так", "Ні"],
           name: "format"
         },
         {
-          text: "Якими мовами ви можете надавати консультації?",
-          options: ["Тільки українська", "Українська та англійська", "Інші"],
-          name: "lang"
+          text: "Чи готові ви проводити консультації англійською?",
+          options: ["Так", "Ні"],
+          name: "language"
         },
         {
           text: "Чи готові ви проводити групові сесії?",
-          options: ["Так", "Ні", "За потреби"],
+          options: ["Так", "Ні"],
           name: "group_sessions"
-        },
-        {
-          text: "Скільки років досвіду у вас є?",
-          options: ["До 3 років", "3-10 років", "Більше 10 років"],
-          name: "experience"
         }
       ]
     };

@@ -1,9 +1,11 @@
 '''back-end'''
 import re
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
 import json
+from collections import defaultdict
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -61,17 +63,19 @@ class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     occupation = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(320), unique=True, nullable=False)
+    email = db.Column(db.Text, unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
 
-    number = db.Column(db.String(320), unique=True)
+    number = db.Column(db.Text, unique=True)
     name = db.Column(db.String(50))
     surname = db.Column(db.String(50))
-    bio = db.Column(db.String(500))
+    bio = db.Column(db.Text)
     verified = db.Column(db.Boolean)
 
-    picture = db.Column(db.Text)
+    picture = db.Column(db.LargeBinary)
     rating = db.Column(db.Float)
+
+    events = db.relationship('Events', back_populates='user', lazy=True)
 
     def __init__(self, occupation, username, email, number, name, \
 surname, bio, password, verified=True, rating=None):
@@ -91,27 +95,41 @@ surname, bio, password, verified=True, rating=None):
         self.rating = rating
 
 class Events(db.Model):
-    '''Event table'''
+    '''Events table'''
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.String(500), nullable=False)
-    picture = db.Column(db.Text)
+    description = db.Column(db.Text, nullable=False)
     accepted = db.Column(db.Boolean)
+    date = db.Column(db.String(10), nullable=False)
+    time = db.Column(db.String(10), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    def __init__(self, title, description, picture):
+    # needed for the algorithm 
+    reviews_count = db.Column(db.Integer, default=0) 
+
+    user = db.relationship('Users', back_populates='events')
+
+    def __init__(self, title, description, date, time, user_id, accepted=False):
         '''for positional arguments'''
         self.title = title
         self.description = description
-        self.picture = picture
-        self.accepted = False
 
+        self.date = date
+        self.time = time
 
+        self.user_id = user_id
+        self.accepted = accepted
+
+# class Preferences(db.Model):
+#     '''Preferences table'''
+#     id = db.Column(db.Integer, primary_key=True)
 
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
-    restricted = ["/main", "/calendar", "/profile", "/settings", "/questionnaire", "/logout"]
-    if request.path in restricted and "user" not in session:
+    restricted = ["/main", "/calendar", "/settings", "/questionnaire", "/logout"]
+    if (request.path in restricted or re.match(r"^/profile/[^/]+$", request.path)) \
+       and "user" not in session:
         return redirect(url_for("start"))
 
 @app.before_request
@@ -144,50 +162,74 @@ def main():
 @app.route("/calendar")
 def calendar():
     '''calendar page'''
+    events = display_events()
     user = Users.query.filter_by(username=session['user']).first()
     occupation = user.occupation
-    return render_template("calendar.html", occupation=occupation)
+    return render_template("calendar.html", occupation=occupation, events=events)
 
-@app.route("/profile")
-def profile():
-    '''profile page'''
-    return render_template("profile.html")
+# @app.route('/profile/<username>')
+# def profile(username):
+#     '''profile page'''
+#     user = Users.query.filter_by(username=username).first()
+#     if not user:
+#         render_template("error.html", error_message="No user with this username")
+#     return render_template('profile.html', current_user=user)
+@app.route('/profile/<username>', methods=["GET", "POST"])
+def profile(username):
+    profile_user = Users.query.filter_by(username=username).first()
+    current_user = Users.query.filter_by(username=session["user"]).first()
+
+    if not profile_user:
+        return render_template("error.html", error_message="No user with this username")
+
+    if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
+        score = float(request.form["rating"])
+        existing = Rating.query.filter_by(user_id=current_user.id, psychologist_id=profile_user.id).first()
+        if existing:
+            existing.score = score
+        else:
+            rating = Rating(user_id=current_user.id, psychologist_id=profile_user.id, score=score)
+            db.session.add(rating)
+        db.session.commit()
+        return redirect(url_for("profile", username=username))
+
+    return render_template('profile.html', user=profile_user, current_user=current_user)
 
 @app.route("/settings")
 def settings():
     '''settings page'''
-    return render_template("settings.html")
+    message = request.args.get('message')
+    return render_template("settings.html", message=message)
 
 
 @app.route("/sign-in-military")
 def m_register():
     '''sign up page'''
-    return render_template("m-register.html")
+    error_message = request.args.get('error_message')
+    return render_template("m-register.html", error_message=error_message)
 
 @app.route('/sign-in-psychologist')
 def ps_register():
     '''sign up page'''
-    return render_template("ps-register.html")
+    error_message = request.args.get('error_message')
+    return render_template("ps-register.html", error_message=error_message)
 
 @app.route('/sign-in-volunteer')
 def v_register():
     '''sign up page'''
-    return render_template('v-register.html')
+    error_message = request.args.get('error_message')
+    return render_template('v-register.html', error_message=error_message)
 
 @app.route("/login")
 def login():
     '''sign up page'''
-    return render_template("login.html")
+    error_message = request.args.get('error_message')
+    return render_template("login.html", error_message=error_message)
 
-@app.route("/approving-psychologist")
-def ps_approving():
+@app.route("/waiting")
+def waiting_page():
     '''after signing up page'''
-    return render_template("ps-approving.html")
-
-@app.route("/approving-event")
-def v_approving():
-    '''after sending event page'''
-    return render_template('v-approving.html')
+    return render_template("waiting-page.html")
 
 @app.route("/validation", methods=["POST"])
 def validate_user():
@@ -198,16 +240,17 @@ def validate_user():
     user = Users.query.filter_by(username=username).first()
 
     if not user:
-        return render_template('login.html', error_message="No account with this username")
+        return redirect(url_for("login", error_message="No account with this username"))
 
     if user.password == password:
-        if user.verified:
+        if user.verified or user.occupation != "psychologist":
             session["user"] = username
             return redirect(url_for("main"))
 
-        return render_template("login.html", error_message="Wait for the verification")
+        
+        return redirect(url_for("login", error_message="Wait for the verification"))
 
-    return render_template("login.html", error_message="Wrong password")
+    return redirect(url_for("login", error_message="Wrong password"))
 
 #all of the regex functions
 def validate_name(name):
@@ -221,32 +264,32 @@ def validate_name(name):
 
 def validate_email(email):
     '''regex for email'''
-    regex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
     return re.fullmatch(regex, email) is not None
 
 def validate_password_1(password):
     '''Minimum eight and maximum 10 characters, at least one
     uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = "^.{8,20}$"
+    regex = r"^.{8,20}$"
     return re.fullmatch(regex, password) is not None
 def validate_password_2(password):
     '''Minimum eight and maximum 10 characters, at least one
     uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = "^(?=.*\d).+$"
+    regex = r"^(?=.*\d).+$"
     return re.fullmatch(regex, password) is not None
 def validate_password_3(password):
     '''Minimum eight and maximum 10 characters, at least one
     uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = "^(?=.*[A-Z]).+$"
+    regex = r"^(?=.*[A-Z]).+$"
     return re.fullmatch(regex, password) is not None
 def validate_password_4(password):
     '''Minimum eight and maximum 10 characters, at least one
     uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = "^[a-zA-Z0-9]+$"
+    regex = r"^[a-zA-Z0-9]+$"
     return re.fullmatch(regex, password) is not None
 def validate_number(number):
     '''must be checked '''
-    regex = "^\+?[0-9]{10,15}$"
+    regex = r"^\+?[0-9]{10,15}$"
     return re.fullmatch(regex, number) is not None
 #all of the regex functions
 
@@ -287,7 +330,7 @@ def save_user():
     name = request.form.get("name")
     #single name, WITHOUT spaces, WITH special characters
     if name:
-        if not re.fullmatch('^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', name):
+        if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', name):
             # if occupation != 'military':
                 return render_template(page, error_message="Invalid name must be between 1-30")
     # no restriction to the size
@@ -295,43 +338,42 @@ def save_user():
     # no restriction to the size
     surname = request.form.get("surname")
     if surname:
-        if not re.fullmatch('^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', surname):
+        if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', surname):
             return render_template(page, error_message="Invalid surname must be between 1- 30")
 
     bio = request.form.get("bio")
     if bio:
-        if not re.fullmatch('^.{1,500}$', bio):
+        if not re.fullmatch(r'^.{1,500}$', bio):
             if occupation != 'military':
                 return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number"))\
 if request.form.get("number") else None
 
-    if occupation == 'military':
-        user = Users(occupation, username, email, number, name, surname, bio, password, True)
+    match occupation:
+        case 'military':
+            user = Users(occupation, username, email, number, name, surname, bio, password, True)
+            page = "m_register"
+        case "psychologist":
+            user = Users(occupation, username, email, number, name, surname, bio,password,False,0.0)
+            page = "ps_register"
+        case "volunteer":
+            user = Users(occupation, username, email, number, name, surname, bio, password, False)
+            page = "v_register"
 
-    else:
-        user = Users(occupation, username, email, number, name, surname, bio, password, False, 0.0)
-    # changes    # changes
-    if not used(username) and validate_email(email) and validate_name(username) and validate_email(email) and \
-validate_password_1(password) and validate_password_2(password) and validate_password_3(password)\
- and validate_password_4(password):
-        if not occupation == 'military':
-            if validate_number(number) and validate_name(name):
-                add_to_db(user)
-                session["user"] = username
-                return redirect(url_for("main"))
-        else:
-            add_to_db(user)
-            session["user"] = username
-            return redirect(url_for("main"))
-    return render_template(page, error_message="Account with this username already exists")
+    if not used(username):
+        add_to_db(user)
+        if occupation == "psychologist":
+            return redirect(url_for("waiting_page"))
+        session["user"] = username
+        return redirect(url_for("main"))
+
+    return redirect(url_for(page, error_message="Account with this username already exists"))
 
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # військовий
     psychologist_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # психолог
     score = db.Column(db.Float, nullable=False)
-from collections import defaultdict
 
 def calculate_influence_scores():
     ratings = Rating.query.all()
@@ -344,11 +386,11 @@ def calculate_influence_scores():
 
 def calculate_psychologist_reputation():
     ratings = Rating.query.all()
-    influence = calculate_influence_scores()
     scores = defaultdict(lambda: [0, 0])  # psychologist_id: [total_weighted, total_weight]
 
     for r in ratings:
-        weight = influence[r.user_id]
+        user = Users.query.get(r.user_id)
+        weight = user.reviews_count or 1
         scores[r.psychologist_id][0] += r.score * weight
         scores[r.psychologist_id][1] += weight
 
@@ -385,28 +427,28 @@ def questions():
     #     db.session.commit()
 
     #     return redirect(url_for("main"))
-    
+    # треба розібратися з бд 
     user = Users.query.filter_by(username=session['user']).first()
-    return render_template("questions.html", occupation=user.occupation)
+    return render_template("questions.html", user=user)
+    # треба розібратися з бд 
 
-
-@app.route("/psychologist/<int:id>", methods=["GET", "POST"])
-def view_psychologist(id):
+@app.route("/psychologist/<username>", methods=["GET", "POST"])
+def view_psychologist(username):
+    profile_user = Users.query.filter_by(username=username).first()
     user = Users.query.filter_by(username=session['user']).first()
     psychologist = Users.query.get(id)
-
-    if request.method == "POST":
+    if request.method == "POST" and user.occupation == "military" and profile_user.occupation == "psychologist":
         score = float(request.form["rating"])
-        existing = Rating.query.filter_by(user_id=user.id, psychologist_id=id).first()
+        existing = Rating.query.filter_by(user_id=user.id, psychologist_id=profile_user.id).first()
         if existing:
             existing.score = score
         else:
-            rating = Rating(user_id=user.id, psychologist_id=id, score=score)
+            rating = Rating(user_id=user.id, psychologist_id=profile_user.id, score=score)
             db.session.add(rating)
+            user.reviews_count = (user.reviews_count or 0) + 1
         db.session.commit()
-        return redirect(url_for("psychologist_list"))
-
-    return render_template("profile.html", psychologist=psychologist)
+        return redirect(url_for("profile", username=username))
+    return render_template("profile.html", user=psychologist, current_user=user)
 
 def used(username):
     '''checks if name is already in use'''
@@ -431,12 +473,165 @@ def create_tables():
 
 def top_psychologists():
     '''sort psycholists by rating'''
-    psychologists = Users.query.filter_by(occupation="psychologist").all()
+    psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
     if psychologists:
         return sorted(sorted(psychologists, key=lambda p: p.username),\
 key=lambda p: p.rating, reverse=True)[:3]
 
+@app.route("/thank-you-for-registration")
+def waiting():
+    '''waiting page'''
+    return render_template("waiting-page.html")
 
+@app.route("/add-event")
+def add_event_page():
+    '''add event page'''
+    message = request.args.get('message')
+    auto_verify()
+    events_autodeletion()
+    return render_template("add-event.html", message=message)
+
+@app.route("/save-event", methods=["POST"])
+def add_event():
+    '''saving event'''
+    name = request.form["name"]
+    description = request.form["description"]
+    date = request.form["date"]
+    time = request.form["time"]
+
+    year, month, day = list(map(int, date.split("-")))
+    hour, minute = list(map(int, time.split(":")))
+
+    user = Users.query.filter_by(username=session["user"]).first()
+    accepted = user.verified
+
+    if datetime(year, month, day, hour, minute) >= datetime.now():
+        event = Events(name, description, date, time, user.id, accepted)
+        add_to_db(event)
+
+        if accepted:
+            message = "Подія була додана в календар. Дякую!"
+
+        else:
+            message = "Дякую за подію! Після верифікації вона буде додана до календаря подій"
+    else:
+        message = "Неправильна дата"
+
+    return redirect(url_for("add_event_page", message=message))
+
+def display_events():
+    '''displays events'''
+    events = Events.query.filter_by(accepted=True).all()
+
+    if events:
+        events = sorted(events, key=lambda e: float(e.time.replace(":", '.'))) #by time
+        events = sorted(events, key=lambda e: int(e.date.split("-")[0])) #by day
+        events = sorted(events, key=lambda e: int(e.date.split("-")[1])) #by month
+        events = sorted(events, key=lambda e: int(e.date.split("-")[2])) #by year
+
+    return events
+
+
+
+@app.route("/verify")
+def verify_page():
+    '''manual verification of users and events'''
+    message = request.args.get('message')
+    return render_template("verify.html", message=message)
+
+
+@app.route("/verify-manual",  methods=["POST"])
+def verify_manual():
+    '''manual user/event verifier'''
+    username = request.form.get("user")
+    eventname = request.form.get("event")
+
+    message = ""
+
+    if username:
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            user.verified = not user.verified
+            db.session.commit()
+            message = f"{user.username} {"un" if not user.verified else ""}verified"
+        else:
+            message = "Invalid username"
+
+    if eventname:
+        event = Users.query.filter_by(title=eventname).first()
+        if event:
+            event.accepted = not event.accepted
+            db.session.commit()
+            message = f"{event.title} {"un" if not event.accepted else ""}accepted"
+        else:
+            message = "Invalid event name"
+    return redirect(url_for('verify_page', message=message))
+
+def events_autodeletion():
+    '''deletes expired events'''
+    events = Events.query.all()
+    for event in events:
+        year, month, day = list(map(int, event.date.split("-")))
+        if datetime(year, month, day).date() < datetime.now().date():
+            db.session.delete(event)
+            db.session.commit()
+
+def auto_verify():
+    '''auto verification'''
+    user = Users.query.filter_by(username=session["user"]).first()
+
+    if sum(1 for event in user.events if event.accepted):
+        user.verified = True
+
+@app.route("/update-info", methods=["POST"])
+def update_info():
+    '''updates info about user'''
+    user = Users.query.filter_by(username = session['user']).first()
+
+    username = request.form.get("username")
+    bio = request.form.get("bio")
+    email = request.form.get("email")
+    number = request.form.get("number")
+    new_password = request.form.get("new_password")
+
+    message = "Неправильний пароль"
+
+    if user.password == request.form["password"]:
+        user.username = username if username else user.username
+        user.bio = bio if bio else user.bio
+        user.email = email if email else user.email
+        user.number = number if number else user.number
+        user.password = new_password if new_password else user.password
+        db.session.commit()
+
+        session["user"] = user.username
+        message = "Дані успішно оновлено"
+
+    return redirect(url_for('settings', message=message))
+
+
+@app.route("/account-deletion", methods=["POST"])
+def delete_account():
+    '''deletes account completely'''
+    user = Users.query.filter_by(username=session["user"]).first()
+    if user.password == request.form["password"]:
+        Events.query.filter_by(user_id=user.id).delete()
+        db.session.delete(user)
+        db.session.commit()
+        logout()
+
+    return redirect(url_for('settings', message="Неправильний пароль"))
+
+#add autodeletion for events
+#decomposition
+#rating system
+
+#email mailing
+#hashing passwords
+
+#regex
+#oauth
+#questions
 
 if __name__ == "__main__":
     create_tables()
