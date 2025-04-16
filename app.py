@@ -22,7 +22,7 @@ class Users(db.Model):
     occupation = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.Text, unique=True, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
+    age = db.Column(db.Integer)
     password = db.Column(db.Text, nullable=False)
 
     number = db.Column(db.Text, unique=True)
@@ -33,6 +33,13 @@ class Users(db.Model):
 
     answered = db.Column(db.Boolean)
     rating = db.Column(db.Float)
+
+    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    who_rated = db.relationship(
+        'Users',
+        backref=db.backref('rated', remote_side=[id]),
+        lazy=True
+    )
 
 
     events = db.relationship('Events', back_populates='user', lazy=True)
@@ -88,6 +95,7 @@ class Answers(db.Model):
     good_age = db.Column(db.Integer)
     english = db.Column(db.Boolean, nullable=False)
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user = db.relationship('Users', back_populates='answer')
 
     def __init__(self, online, experience, activities, english, user_id, good_age=None):
@@ -134,7 +142,7 @@ def logout_page():
 def main():
     '''main page'''
     user = Users.query.filter_by(username=session['user']).first()
-    top = top_psychologists()[:5]
+    top = top_psychologists()
     return render_template("main.html", occupation=user.occupation, top=top, user=user)
 
 @app.route("/calendar")
@@ -278,7 +286,7 @@ def top_psychologists():
     psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
     if psychologists:
         return sorted(sorted(psychologists, key=lambda p: p.username),\
-key=lambda p: p.rating, reverse=True)
+key=lambda p: p.rating, reverse=True)[:5]
 
 @app.route("/thank-you-for-registration")
 def waiting():
