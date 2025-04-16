@@ -74,9 +74,13 @@ class Users(db.Model):
 
     picture = db.Column(db.LargeBinary)
     rating = db.Column(db.Float)
+    reviews_count = db.Column(db.Integer, default=0)
+
+    # зв'язок з рейтингами
+    given_ratings = db.relationship("Rating", foreign_keys='Rating.rater_id', backref="rater", lazy=True)
+    received_ratings = db.relationship("Rating", foreign_keys='Rating.rated_id', backref="rated", lazy=True)
 
     events = db.relationship('Events', back_populates='user', lazy=True)
-
     def __init__(self, occupation, username, email, number, name, \
 surname, bio, password, verified=True, rating=None):
         '''for positional arguments'''
@@ -167,13 +171,6 @@ def calendar():
     occupation = user.occupation
     return render_template("calendar.html", occupation=occupation, events=events)
 
-# @app.route('/profile/<username>')
-# def profile(username):
-#     '''profile page'''
-#     user = Users.query.filter_by(username=username).first()
-#     if not user:
-#         render_template("error.html", error_message="No user with this username")
-#     return render_template('profile.html', current_user=user)
 @app.route('/profile/<username>', methods=["GET", "POST"])
 def profile(username):
     profile_user = Users.query.filter_by(username=username).first()
@@ -184,12 +181,15 @@ def profile(username):
 
     if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
         score = float(request.form["rating"])
-        existing = Rating.query.filter_by(user_id=current_user.id, psychologist_id=profile_user.id).first()
+        existing = Rating.query.filter_by(rater_id=current_user.id, rated_id=profile_user.id).first()
+
         if existing:
             existing.score = score
         else:
-            rating = Rating(user_id=current_user.id, psychologist_id=profile_user.id, score=score)
+            rating = Rating(rater_id=current_user.id, rated_id=profile_user.id, score=score)
             db.session.add(rating)
+            current_user.reviews_count += 1
+
         db.session.commit()
         return redirect(url_for("profile", username=username))
 
@@ -371,8 +371,8 @@ if request.form.get("number") else None
 
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # військовий
-    psychologist_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # психолог
+    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))   # військовий
+    rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))   # психолог
     score = db.Column(db.Float, nullable=False)
 
 def calculate_influence_scores():
@@ -386,19 +386,25 @@ def calculate_influence_scores():
 
 def calculate_psychologist_reputation():
     ratings = Rating.query.all()
-    scores = defaultdict(lambda: [0, 0])  # psychologist_id: [total_weighted, total_weight]
+    scores = defaultdict(lambda: [0, 0])  # rated_id: [total_weighted, total_weight]
 
     for r in ratings:
-        user = Users.query.get(r.user_id)
-        weight = user.reviews_count or 1
-        scores[r.psychologist_id][0] += r.score * weight
-        scores[r.psychologist_id][1] += weight
+        weight = r.rater.reviews_count or 1
+        scores[r.rated_id][0] += r.score * weight
+        scores[r.rated_id][1] += weight
 
     reputations = {}
     for pid, (total, weight) in scores.items():
         reputations[pid] = round(total / weight, 2) if weight > 0 else 0.0
 
     return reputations
+def update_user_rating(user_id):
+    '''оновлює рейтинг психолога в Users після оцінки'''
+    rep_scores = calculate_psychologist_reputation()
+    user = Users.query.get(user_id)
+    if user:
+        user.rating = rep_scores.get(user.id, 0.0)
+        db.session.commit()
 @app.route("/psychologists")
 def psychologist_list():
     rep_scores = calculate_psychologist_reputation()
@@ -434,21 +440,27 @@ def questions():
 
 @app.route("/psychologist/<username>", methods=["GET", "POST"])
 def view_psychologist(username):
-    profile_user = Users.query.filter_by(username=username).first()
-    user = Users.query.filter_by(username=session['user']).first()
-    psychologist = Users.query.get(id)
-    if request.method == "POST" and user.occupation == "military" and profile_user.occupation == "psychologist":
+    profile_user = Users.query.filter_by(username=username).first()  # психолог
+    current_user = Users.query.filter_by(username=session['user']).first()  # військовий
+
+    if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
         score = float(request.form["rating"])
-        existing = Rating.query.filter_by(user_id=user.id, psychologist_id=profile_user.id).first()
+
+        existing = Rating.query.filter_by(rater_id=current_user.id, rated_id=profile_user.id).first()
         if existing:
             existing.score = score
         else:
-            rating = Rating(user_id=user.id, psychologist_id=profile_user.id, score=score)
-            db.session.add(rating)
-            user.reviews_count = (user.reviews_count or 0) + 1
+            new_rating = Rating(rater_id=current_user.id, rated_id=profile_user.id, score=score)
+            db.session.add(new_rating)
+            current_user.reviews_count = (current_user.reviews_count or 0) + 1
+
         db.session.commit()
+        update_user_rating(profile_user.id)
+
         return redirect(url_for("profile", username=username))
-    return render_template("profile.html", user=psychologist, current_user=user)
+
+    return render_template("profile.html", user=profile_user, current_user=current_user)
+
 
 def used(username):
     '''checks if name is already in use'''
