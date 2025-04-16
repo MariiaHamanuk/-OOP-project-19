@@ -210,21 +210,16 @@
         </div>
     </div>
     <script>
+        localStorage.removeItem("accountToggleChecked");
+
         const checkbox = document.getElementById("account-toggle");
         const leftSw = document.querySelector(".left_sw");
         const rightSw = document.querySelector(".right_sw");
 
         window.addEventListener("DOMContentLoaded", function () {
-    const savedState = localStorage.getItem("accountToggleChecked");
-
-    if (savedState === null) {
-        checkbox.checked = false; // Початковий стан — права сторона
-    } else {
-        checkbox.checked = savedState === "true";
-    }
-
-    updateSwitchStyles();
-});
+            checkbox.checked = true;
+            updateSwitchStyles();
+        });
 
 
         checkbox.addEventListener("change", function () {

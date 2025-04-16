@@ -236,42 +236,44 @@
         </div>
     </div>
     <script>
+        localStorage.removeItem("accountToggleChecked");
+
         const checkbox = document.getElementById("account-toggle");
         const leftSw = document.querySelector(".left_sw");
         const rightSw = document.querySelector(".right_sw");
 
         window.addEventListener("DOMContentLoaded", function () {
-    const savedState = localStorage.getItem("accountToggleChecked");
-
-    if (savedState === null) {
-        checkbox.checked = false; // Початковий стан — права сторона
-    } else {
-        checkbox.checked = savedState === "true";
-    }
-
-    updateSwitchStyles();
-});
-
-        checkbox.addEventListener("change", function () {
-            localStorage.setItem("accountToggleChecked", this.checked);
-            if (!this.checked) {
-                window.location.href = "/login";
-            }
+            checkbox.checked = true;
+            updateSwitchStyles();
         });
 
         function updateSwitchStyles() {
             if (checkbox.checked) {
+                // "Не маю акаунт" (права сторона активна)
                 leftSw.style.backgroundColor = "#6ec6c4";
                 leftSw.style.color = "black";
                 rightSw.style.backgroundColor = "#4b9391";
                 rightSw.style.color = "white";
             } else {
+                // "Маю акаунт" (ліва сторона активна)
                 leftSw.style.backgroundColor = "#4b9391";
                 leftSw.style.color = "white";
                 rightSw.style.backgroundColor = "#6ec6c4";
                 rightSw.style.color = "black";
             }
         }
+    
+    
+        checkbox.addEventListener("change", function () {
+            localStorage.setItem("accountToggleChecked", checkbox.checked);
+            updateSwitchStyles();
+    
+            // Якщо перемикач переключився на "маю акаунт" — редірект на логін
+            if (!checkbox.checked) {
+                window.location.href = "/login";
+            }
+        });
     </script>
+    
 </body>
 </html>
