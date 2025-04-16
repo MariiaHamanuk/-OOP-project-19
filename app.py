@@ -22,6 +22,7 @@ class Users(db.Model):
     occupation = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.Text, unique=True, nullable=False)
+    age = db.Column(db.Integer, nullable=False)
     password = db.Column(db.Text, nullable=False)
 
     number = db.Column(db.Text, unique=True)
@@ -30,17 +31,20 @@ class Users(db.Model):
     bio = db.Column(db.Text)
     verified = db.Column(db.Boolean)
 
-    picture = db.Column(db.LargeBinary)
+    answered = db.Column(db.Boolean)
     rating = db.Column(db.Float)
 
+
     events = db.relationship('Events', back_populates='user', lazy=True)
+    answer = db.relationship('Answers', back_populates='user', uselist=False)
 
     def __init__(self, occupation, username, email, number, name, \
-surname, bio, password, verified=True, rating=None):
+surname, bio, password, verified=True, rating=None, age=None):
         '''for positional arguments'''
         self.occupation = occupation
         self.username = username
         self.email = email
+        self.age = age
 
         self.number = number
         self.name = name
@@ -75,9 +79,29 @@ class Events(db.Model):
         self.user_id = user_id
         self.accepted = accepted
 
-# class Preferences(db.Model):
-#     '''Preferences table'''
-#     id = db.Column(db.Integer, primary_key=True)
+class Answers(db.Model):
+    '''Answers table'''
+    id = db.Column(db.Integer, primary_key=True)
+    online = db.Column(db.Boolean, nullable=False)
+    experience = db.Column(db.Boolean, nullable=False)
+    activities = db.Column(db.Boolean, nullable=False)
+    good_age = db.Column(db.Integer)
+    english = db.Column(db.Boolean, nullable=False)
+
+    user = db.relationship('Users', back_populates='answer')
+
+    def __init__(self, online, experience, activities, english, user_id, good_age=None):
+        '''for positional arguments'''
+        self.online = online
+        self.experience = experience
+        self.activities = activities
+        self.good_age = good_age
+        self.english = english
+
+        self.user_id = user_id
+
+
+
 
 @app.before_request
 def restricted_pages():
@@ -110,9 +134,8 @@ def logout_page():
 def main():
     '''main page'''
     user = Users.query.filter_by(username=session['user']).first()
-    occupation = user.occupation
-    top = top_psychologists()
-    return render_template("main.html", occupation=occupation, top=top)
+    top = top_psychologists()[:5]
+    return render_template("main.html", occupation=user.occupation, top=top, user=user)
 
 @app.route("/calendar")
 def calendar():
@@ -139,7 +162,8 @@ def profile(username):
 def settings():
     '''settings page'''
     message = request.args.get('message')
-    return render_template("settings.html", message=message)
+    user = Users.query.filter_by(username=session['user']).first()
+    return render_template("settings.html", message=message, user=user)
 
 
 @app.route("/sign-in-military")
@@ -254,7 +278,7 @@ def top_psychologists():
     psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
     if psychologists:
         return sorted(sorted(psychologists, key=lambda p: p.username),\
-key=lambda p: p.rating, reverse=True)[:3]
+key=lambda p: p.rating, reverse=True)
 
 @app.route("/thank-you-for-registration")
 def waiting():
@@ -309,7 +333,9 @@ def display_events():
 
     return events
 
-
+@app.route("/save-answer", methods=["POST"])
+def save_answer():
+    '''saves answer'''
 
 @app.route("/verify")
 def verify_page():
@@ -400,16 +426,14 @@ def delete_account():
 
     return redirect(url_for('settings', message="Неправильний пароль"))
 
-#add autodeletion for events
 #decomposition
-#rating system
 
 #email mailing
 #hashing passwords
 
-#regex
-#oauth
+
 #questions
+#rating system
 
 if __name__ == "__main__":
     create_tables()
