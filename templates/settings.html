@@ -2,247 +2,129 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Редагування профілю | Beyond Duty</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+  <title>Налаштування</title>
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background-color: #fff;
-      color: #243a76;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      padding: 20px 30px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .icon-button {
-      width: 36px;
-      height: 36px;
-      background-color: #243a76;
-      border-radius: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-right: 12px;
-      box-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
-      cursor: pointer;
-      color: #ffffff;
-      font-size: 20px;
-      border: none;
-    }
-
-    .circle-icon {
-      width: 30px;
-      height: 30px;
-      background-color: #6ddbd4;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-
-    .logo-text {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-
-    nav {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 30px;
-      font-weight: 500;
+      padding: 0;
     }
 
     .container {
-      padding: 30px 20px;
+      padding: 2rem;
+    }
+
+    h2 {
+      color: #1e3a78;
+    }
+
+    input, textarea {
+      width: 50%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #6ec6c4;
+      border-radius: 15px;
+    }
+
+    .submit-button {
+      width: 50%;
+      padding: 10px;
+      background-color: #6ec6c4;
+      margin: 10px 0;
+      border: 1px solid #6ec6c4;
+      border-radius: 15px;
+      cursor: pointer;
+    }
+
+    .submit-button:hover {
+      background-color: #4b9391;
+    }
+
+    .top-bar {
+      background-color: #263871;
+      color: white;
       display: flex;
-      flex-direction: column;
       align-items: center;
+      padding: 15px 30px;
     }
 
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      width: 100%;
-      max-width: 950px;
-    }
-
-    .profile-photo-section,
-    .bio-section {
-      background-color: #243a76;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 30px;
-      max-width: 950px;
-      width: 100%;
-    }
-
-    .profile-photo {
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      color: #263871;
+      border: none;
+      border-radius: 12px;
+      font-size: 20px;
+      cursor: pointer;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      transition: background-color 0.2s;
     }
 
-    .avatar {
-      width: 80px;
-      height: 80px;
-      background-color: #ccc;
-      border-radius: 50%;
+    .back-btn:hover {
+      background-color: #e0e0e0;
     }
 
-    .photo-buttons {
+    .header-title {
       display: flex;
+      align-items: center;
       gap: 15px;
     }
 
-    .button {
-      background-color: #6ddbd4;
-      color: #243a76;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 15px;
+    .circle {
+      width: 30px;
+      height: 30px;
+      background-color: #6ed0d9;
+      border-radius: 50%;
+    }
+
+    .message {
+      color: green;
       font-weight: bold;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.3s ease;
-    }
-
-    .button:hover {
-      background-color: #a2e6e1;
-    }
-
-    .bio-card {
-      display: flex;
-      background-color: #aeb5d2;
-      border-radius: 10px;
-      padding: 20px;
-      color: #243a76;
       margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .bio-left {
-      font-weight: bold;
-      min-width: 200px;
-    }
-
-    .bio-right {
-      padding-left: 20px;
-      max-width: 600px;
-    }
-
-    .bio-buttons {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .bio-buttons .button {
-      flex: 1;
-      min-width: 180px;
-    }
-
-    .save-cancel {
-      margin-top: 30px;
-      display: flex;
-      gap: 20px;
-      justify-content: flex-end;
-      max-width: 950px;
-      width: 100%;
-    }
-
-    .cancel-button {
-      background-color: #ccc;
-      color: #333;
-    }
-
-    footer {
-      background-color: #243a76;
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-      margin-top: 50px;
-    }
-
-    footer input {
-      margin-top: 10px;
-      padding: 8px 15px;
-      border-radius: 20px;
-      border: none;
-      margin-right: 10px;
-      font-size: 14px;
-    }
-
-    footer .button {
-      padding: 8px 20px;
-      border-radius: 20px;
     }
   </style>
 </head>
 <body>
-
-<header>
-  <div class="icon-button" title="Назад">←</div>
-  <div class="circle-icon"></div>
-  <div class="logo-text">BEYOND DUTY</div>
-  <nav>
-    <span>Календар подій</span>
-    <span>Ваші психологи</span>
-    <span><img src="https://via.placeholder.com/30" alt="профіль"> Олександр ▾</span>
-  </nav>
-</header>
-
-<div class="container">
-  <div class="section-title">Редагувати профіль</div>
-
-  <div class="profile-photo-section">
-    <div class="profile-photo">
-      <div class="avatar"></div>
-      <div class="photo-buttons">
-        <button class="button">Змінити світлину</button>
-        <button class="button">Видалити світлину</button>
-      </div>
+  <header class="top-bar">
+    <button class="back-btn" onclick="window.location.href='/main'">&#8592;</button>
+    <div class="header-title">
+      <div class="circle"></div>
+      <h1>НАЛАШТУВАННЯ</h1>
     </div>
+  </header>
+
+  <div class="container">
+    {% if message %}
+      <div class="message">{{ message }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('update_info') }}">
+      <label for="username">Ім’я користувача:</label><br>
+      <input type="text" id="username" name="username" placeholder="{{ user.username }}"><br>
+
+      <label for="email">Email:</label><br>
+      <input type="email" id="email" name="email" placeholder="{{ user.email }}"><br>
+
+      <label for="number">Номер телефону:</label><br>
+      <input type="text" id="number" name="number" placeholder="{{ user.number }}"><br>
+
+      <label for="bio">Опис (біо):</label><br>
+      <textarea id="bio" name="bio" rows="4" placeholder="{{ user.bio }}"></textarea><br>
+
+      <label for="password">Поточний пароль:</label><br>
+      <input type="password" id="password" name="password" placeholder="*обов'язково"required><br>
+
+      <label for="new_password">Новий пароль:</label><br>
+      <input type="password" id="new_password" name="new_password"><br>
+
+      <button type="submit" class="submit-button">Оновити дані</button>
+    </form>
   </div>
-
-  <div class="section-title">Біографія</div>
-
-  <div class="bio-section">
-    <div class="bio-card">
-      <div class="bio-left">
-        Олександр Коваленко<br>
-        ЗСУ, 2014–2023
-      </div>
-      <div class="bio-right">
-        Ветеран, який пройшов непростий шлях на передовій, а тепер шукаю можливості допомагати іншим і працювати над власним відновленням. Був на 10 волонтерських подіях – від збору гуманітарної допомоги до реабілітаційних таборів для побратимів.
-      </div>
-    </div>
-    <div class="bio-buttons">
-      <button class="button">Змінити ім’я</button>
-      <button class="button">Змінити роки служби</button>
-      <button class="button">Змінити біографію</button>
-    </div>
-  </div>
-
-  <div class="save-cancel">
-    <button class="button cancel-button">Скасувати зміни</button>
-    <button class="button">Зберегти</button>
-  </div>
-</div>
-
-<footer>
-  <strong>Beyond Duty</strong><br>
-  Напишіть відгук<br>
-  <input type="text" placeholder="Ваш відгук...">
-  <button class="button">Надіслати</button>
-</footer>
 
 </body>
 </html>
