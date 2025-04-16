@@ -200,7 +200,13 @@
         .back-button:hover {
             background: #646464;
         }
-
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: right;
+            /* padding-right: 190px; */
+        }
     </style>
 </head>
 <body>
@@ -223,6 +229,9 @@
                 <input type="email" name="email" placeholder="Ваш email" required>
                 <input type="text" id="bio" name="bio" placeholder="Розкажіть про себе" required>
                 <input type="password" id="password" name="password" placeholder="Пароль" required>
+                {% if error_message %}
+                    <p class="error-message">{{ error_message }}</p>
+                {% endif %}
                 <button class="login-button" type="submit">Надіслати</button>
                 <div class="toggle-container">
                     <input type="checkbox" id="account-toggle" class="switch-input">
