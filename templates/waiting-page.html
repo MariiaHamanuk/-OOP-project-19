@@ -1,9 +1,56 @@
 <!DOCTYPE html>
-<html>
-    <a href="{{ url_for('start') }}">
-        <button> << </button>
-    </a>
-    <h1>Дякую за реєстрацію!</h1>
-    <h3>З вами зв'яжуться для верифікації, очікуйте</h3>
-    <h1 style:="color:yellow"> :) </h1>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Очікування підтвердження</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1d2c5b;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .message-container {
+            background-color: white;
+            padding: 60px 80px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+        }
+        .message-container h1 {
+            color: #1e3a78;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .message-container p {
+            font-size: 18px;
+            color: #333;
+        }
+        .back-button {
+            margin-top: 30px;
+            background: #6ec6c4;
+            color: white;
+            border: none;
+            padding: 10px 40px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .back-button:hover {
+            background: #4b9391;
+        }
+    </style>
+</head>
+<body>
+    <div class="message-container">
+        <h1>Дякуємо!</h1>
+        <p>Ваші дані надіслано.<br>Очікуйте на підтвердження адміністратора.</p>
+        <button class="back-button" onclick="window.location.href='/start'">На головну</button>
+    </div>
+</body>
 </html>

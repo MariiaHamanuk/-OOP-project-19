@@ -1,16 +1,129 @@
 <!DOCTYPE html>
-<html>
-    <h1>starting page</h1>
-    <a href="{{ url_for('m_register') }}">
-        <button>Я військовий</button>
-    </a>
-    <br>
-    <br>
-    <a href="{{ url_for('ps_register') }}">
-        <button>Я психолог</button>
-    </a>
-    <br>
-    <br>
-    <a href="{{ url_for('v_register') }}">
-        <button>Я хочу додати подію</button>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beyond Duty</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+        }
+
+        .sidebar {
+            width: 25%; /* Трохи збільшив ширину бокової панелі */
+            background-color: #1d2c5b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+            gap: 15px;
+        }
+
+        .sidebar img {
+            width: 180px; /* Вдвічі збільшив ширину */
+            height: 180px; /* Вдвічі збільшив висоту */
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; /* Центрування всього контенту */
+            text-align: center;
+            padding: 5vw;
+            width: 75%;
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: 900; /* Найжирніший варіант */
+            color: #1d2c5b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .title span {
+            width: 30px;
+            height: 30px;
+            background-color: #6ec6c4;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .text {
+            font-size: 20px; /* Трохи збільшив шрифт */
+            line-height: 1.8;
+            margin-bottom: 30px;
+            color: #333;
+            max-width: 80%;
+        }
+
+        .button {
+            background-color: #6ec6c4;
+            border: none;
+            color: white;
+            font-size: 20px;
+            padding: 18px;
+            margin: 10px 0;
+            width: 70%;
+            max-width: 500px;
+            border-radius: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #4b9391;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <img src="https://kyiv24.news/wp-content/uploads/2024/07/depositphotos_583682600-stock-photo-close-female-soldier-showing-heart.jpg" alt="Soldier 1">
+        <img src="https://ukr.radio/images/news/big/news_1730895675_672b5f3b2c1fc.jpg" alt="Soldier 2">
+        <img src="https://visitukraine.today/media/blog/previews/9bMGFk6hcgF2g7DLB2uel0aNUuRiskr3YDzpCGeM.webp" alt="Soldier 3">
+        <img src="https://spacemag.com.ua/wp-content/uploads/2024/03/photo_2022-10-01_13-10-10.jpg" alt="Soldier 4">
+    </div>
+
+    <div class="content">
+        <div class="title">
+            <span></span> BEYOND DUTY
+        </div>
+        <p class="text">
+            <strong>Beyond Duty</strong> – це онлайн-платформа, яка допомагає військовим інтегруватися в цивільне життя через систему менторства. 
+            Наш сервіс працює як платформа знайомств, де кожен військовий може знайти собі ментора – психолога або людину з досвідом роботи з ветеранами, 
+            який допоможе йому зробити перші кроки до нормального життя.
+        </p>
+        <!-- <button class="button">Я військовий</button>
+        <button class="button">Я психолог</button>
+        <button class="button">Я хочу додати подію</button> -->
+        <a href="{{ url_for('m_register') }}" class="button" onclick="setOccupation('military')">Я військовий</a>
+        <a href="{{ url_for('ps_register') }}" class="button" onclick="setOccupation('psychologist')">Я психолог</a>
+        <a href="{{ url_for('v_register') }}" class="button" onclick="setOccupation('volunteer')">Я хочу додати подію</a>                     
+    </div>
+    <script>
+        function setOccupation(role) {
+            localStorage.setItem("occupation", role);
+            console.log("Occupation set to:", role);
+        }
+    </script>   
+</body>
 </html>

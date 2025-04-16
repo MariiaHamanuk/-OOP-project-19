@@ -1,20 +1,261 @@
 <!DOCTYPE html>
-<html>
-        <a href="{{ url_for('main') }}">
-            <button> << </button>
-        </a>
-    {% if user.username == session["user"] %}
-        <a href="{{ url_for('settings') }}">
-            <button> Редагувати профіль </button>
-        </a>
-    {% endif %}
-    <h1>{{ user.username }}</h1>
-    <h4>{{ "{} {}".format(user.email, user.number if user.number else "")}}</h4>
-    <h3>{{ "{} {}".format(user.name if user.name else "", user.surname if user.surname else "")}}</h3>
-    {% if user.bio %}
-        <h4>{{user.bio}}</h4>
-    {% endif %}
-    {% if user.occupation == "psychologist" %}
-        <h3>{{user.rating}}</h3>
-    {% endif %}
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Профіль | Beyond Duty</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fff;
+      color: #0A1D4E;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 60px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 24px;
+      color: #243a76;
+    }
+
+    .logo-circle {
+      width: 30px;
+      height: 30px;
+      background-color: #6ddbd4;
+      border-radius: 50%;
+    }
+
+    nav {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      font-weight: 400;
+    }
+
+    nav .profile-button {
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    nav .profile-button img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    .main-content {
+      flex: 1;
+    }
+
+    .profile-card {
+      background-color: #243a76;
+      margin: 30px 60px;
+      padding: 30px;
+      border-radius: 20px;
+      display: flex;
+      align-items: flex-start;
+      color: white;
+    }
+
+    .avatar-large {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-right: 40px;
+      background-image: url('https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .bio-block {
+      background-color: #c3cdea;
+      padding: 25px;
+      border-radius: 10px;
+      color: #0A1D4E;
+      flex-grow: 1;
+      margin-right: 20px;
+    }
+
+    .bio-block strong {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .profile-buttons {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .profile-buttons button {
+      width: 20%;
+      background-color: #6ddbd4;
+      color: #0A1D4E;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+
+    .profile-buttons button:hover {
+      background-color: #9aeae4;
+    }
+    .profile-buttons .logout {
+      background-color: #ed9c93;
+      color: #0A1D4E;
+    }
+
+    .profile-buttons .logout:hover {
+      background-color: #ff6b61;
+    }
+
+
+    .section {
+      margin: 40px 60px;
+    }
+
+    .section h3 {
+      margin-bottom: 15px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .section img {
+      border-radius: 10px;
+      width: 200px;
+    }
+
+    .recent-events {
+      display: flex;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .event-card {
+      width: 220px;
+      height: 160px;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 1px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      background-color: #243a76;
+      color: white;
+      text-align: center;
+      padding: 50px 20px;
+      margin-top: 60px;
+    }
+
+    footer input {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      margin-right: 10px;
+      font-size: 14px;
+      outline: none;
+      width: 200px;
+    }
+
+    footer .button {
+      background-color: #6ddbd4;
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-circle"></div>
+      BEYOND DUTY
+    </div>
+    <nav>
+      <a href="/calendar" style="text-decoration: none; color: inherit;">Календар подій</a>
+      {% if user.occupation == "military" %}
+        <span>Ваші психологи</span>
+      {% endif %}
+      <button class="profile-button">
+        <img src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="профіль">
+      </button>
+    </nav>
+    
+  </header>
+
+  <main class="main-content">
+    <div class="profile-card">
+      <div class="avatar-large"></div>
+      <div class="bio-block">
+        <strong>{{ user.username }}</strong>
+        {{ user.bio }}
+        <div class="profile-buttons">
+          <button onclick="window.location.href='/settings'">Налаштування</button>
+          <button onclick="window.location.href='/main'">Домашня сторінка</button>
+          <button class="profile-button logout" onclick="window.location.href='/logout'">Вийти</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      {% if user.occupation == "military" %}
+        <h3>Мої психологи:</h3>
+        <img src="https://images.unsplash.com/photo-1611042553484-75f3e75b5e2b?auto=format&fit=crop&w=500&q=80" alt="психолог">
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <h3>Нещодавно відвідані події:</h3>
+      <div class="recent-events">
+        {% for event in user.recent_events %}
+          <div class="event-card">
+            <img src="{{ event.image_url }}" alt="{{ event.title }}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <strong>Beyond Duty</strong><br>
+    Напишіть відгук<br><br>
+    <input type="text" placeholder="Ваш відгук...">
+    <button class="button">Надіслати</button>
+  </footer>
+
+</body>
 </html>
