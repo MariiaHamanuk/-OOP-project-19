@@ -115,6 +115,7 @@
     }
 
     .profile-buttons button {
+      width: 20%;
       background-color: #6ddbd4;
       color: #0A1D4E;
       border: none;
@@ -129,6 +130,15 @@
     .profile-buttons button:hover {
       background-color: #9aeae4;
     }
+    .profile-buttons .logout {
+      background-color: #ed9c93;
+      color: #0A1D4E;
+    }
+
+    .profile-buttons .logout:hover {
+      background-color: #ff6b61;
+    }
+
 
     .section {
       margin: 40px 60px;
@@ -216,6 +226,7 @@
         <div class="profile-buttons">
           <button onclick="window.location.href='/settings'">Налаштування</button>
           <button onclick="window.location.href='/main'">Домашня сторінка</button>
+          <button class="profile-button logout" onclick="window.location.href='/logout'">Вийти</button>
         </div>
       </div>
     </div>
