@@ -588,14 +588,16 @@ def save_answer():
 def verify_page():
     '''manual verification of users and events'''
     message = request.args.get('message')
-    return render_template("verify.html", message=message)
+    users = unverified_users()
+    events = unverified_events()
+    return render_template("verify.html", message=message, users=users, events=events)
 
 
 @app.route("/verify-manual",  methods=["POST"])
 def verify_manual():
     '''manual user/event verifier'''
     username = request.form.get("user")
-    eventname = request.form.get("event")
+    event_id = request.form.get("event")
 
     message = ""
 
@@ -608,15 +610,24 @@ def verify_manual():
         else:
             message = "Invalid username"
 
-    if eventname:
-        event = Users.query.filter_by(title=eventname).first()
+    if event_id:
+        event = Events.query.filter_by(id=event_id).first()
         if event:
             event.accepted = not event.accepted
             db.session.commit()
             message = f"{event.title} {"un" if not event.accepted else ""}accepted"
         else:
-            message = "Invalid event name"
+            message = "Invalid event id"
     return redirect(url_for('verify_page', message=message))
+
+def unverified_users():
+    '''disaplays unverified users'''
+    return Users.query.filter_by(verified=False).order_by(Users.id.asc()).all()[:5]
+
+
+def unverified_events():
+    '''displays unverified events'''
+    return Events.query.filter_by(accepted=False).order_by(Events.id.asc()).all()[:5]
 
 def events_autodeletion():
     '''deletes expired events'''

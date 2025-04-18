@@ -4,19 +4,35 @@
         <button> << </button>
     </a>
     <br>
-    <form action="{{ url_for('verify_manual') }}", method="POST">
+    <form action="{{ url_for('verify_manual') }}" method="POST">
         <label for="username"> Username </label>
         <br>
         <input type="text" id="user" name="user">
         <br>
-        <label for="email"> Event name</label>
+        <label for="email"> Event id</label>
         <br>
         <input type="text" id="event" name="event">
         <br>
         <button>submit</button>
     </form>
     {% if message %}
-    <p>{{ message }}</p>
+        <p>{{ message }}</p>
+    {% endif %}
+
+    {% if users %}
+        {% for user in users %}
+            <a href="{{ url_for('profile', username=user.username) }}">
+                {{ user.username }}
+            </a>
+        {% endfor %}
+    {% endif %}
+    <p> --- </p>
+    {% if events %}
+        {% for event in events %}
+            {{ "id: {} | title: {}".format(event.id, event.title) }}
+            <br>
+            {{ "description: {}".format(event.description) }}
+        {% endfor %}
     {% endif %}
 
 </html>
