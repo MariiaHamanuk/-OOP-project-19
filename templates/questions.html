@@ -196,7 +196,7 @@
       <a href="{{ url_for('calendar') }}">Календар подій</a>
       <a href="/psychologists">Ваші психологи</a>
       <a href="{{ url_for('profile', username=session['user']) }}">
-        <span id="user-name">Олександр</span>
+        <span id="user-name">Профіль</span>
         <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
           <path d="M1 1L6 5L11 1" stroke="#666" stroke-width="1.5"/>
         </svg>
@@ -205,7 +205,7 @@
   </nav>
 
   <div class="container">
-    <form id="poll-form" method="POST" action="/api/submit-questionnaire">
+    <form id="poll-form" method="POST" action="/submit-questionnaire">
       <div class="poll-header">
         <span>Опитування</span>
       </div>
@@ -221,7 +221,7 @@
       <div class="poll-footer">
         <button type="button" class="btn btn-secondary" id="prev-btn" disabled>Назад</button>
         <button type="button" class="btn btn-primary" id="next-btn">Далі</button>
-        <button type="submit" class="btn btn-primary" id="submit-btn" style="display: none;">Завершити</button>
+        <button type="button" onclick="submitPoll()">Завершити</button>
       </div>
 
       <input type="hidden" name="user_id" id="user_id">
@@ -231,22 +231,13 @@
   </div>
 
   <script>
-    // Get user info from URL or localStorage
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user_id') || localStorage.getItem('userId') || '';
-    // const occupation = document.body.dataset.occupation || 'military'
-    const occupation = "{{ user.occupation }}"
-    // Set hidden form values
-    document.getElementById('user_id').value = userId;
-    document.getElementById('occupation').value = occupation;
-    
-    // If user name is available in local storage, display it
-    const storedName = localStorage.getItem('userName');
-    if (storedName) {
-      document.getElementById('user-name').textContent = storedName;
-    }
-    
-    // Define questions for different occupations
+    let occupation = "{{ user.occupation }}";
+    let questions = [];
+    const answers = {};
+    let current = 0;
+
     const allQuestions = {
       military: [
         {
@@ -254,26 +245,27 @@
           options: ["Так", "Ні"],
           name: "military_exp"
         },
-        { 
-          text: "Чи готові ви займатися офлайн?",
+        {
+          text: "Чи готові ви приходити на офлайн зустрічі?",
           options: ["Так", "Ні"],
           name: "format"
         },
-        { 
+        {
           text: "Якою мовою вам зручніше спілкуватися?",
-          options: ["Українська", "Англійська"],
+          options: ["Українською", "Англійською"],
           name: "language"
         },
-        { 
-          text: "Чи хочете ви брати участь у різних активностях з ветеранами?",
-          options: ["Так", "Ні", "Все одно"],
-          name: "activities"
+        {
+          text: "Чи бажаєте ви відвідувати заходи з іншими ветеранами?",
+          options: ["Так", "Ні"],
+          name: "group_sessions"
         },
         {
-          text: "Вік психолога:",
-          options: ["До 30", "30–50", "50+", "Не має значення"],
+          text: "Скільки років повинно бути вашому психологу",
+          options: ["до 30", "30-50", "50+"],
           name: "age"
         }
+
       ],
       psychologist: [
         {
@@ -298,11 +290,6 @@
         }
       ]
     };
-    
-    // Use the appropriate question set based on occupation
-    let questions = allQuestions[occupation];
-    let current = 0;
-    const answers = {};
 
     function updateProgressBar() {
       const progress = ((current + 1) / questions.length) * 100;
@@ -311,8 +298,8 @@
 
     function renderQuestion() {
       const q = questions[current];
-      document.getElementById("question-text").innerText = q.text;
       const answersDiv = document.getElementById("answers");
+      document.getElementById("question-text").innerText = q.text;
       answersDiv.innerHTML = "";
 
       q.options.forEach(opt => {
@@ -320,41 +307,32 @@
         btn.type = "button";
         btn.className = "answer-button";
         btn.innerText = opt;
-        
+
         if (answers[q.name] === opt) {
           btn.classList.add("selected");
         }
-        
-        btn.onclick = () => {
-          // Remove selected class from all buttons
-          document.querySelectorAll(".answer-button").forEach(button => {
-            button.classList.remove("selected");
-          });
-          
-          // Add selected class to clicked button
-          btn.classList.add("selected");
 
+        btn.onclick = () => {
+          document.querySelectorAll(".answer-button").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
           answers[q.name] = opt;
+          console.log("Збережено:", answers);
         };
+
         answersDiv.appendChild(btn);
       });
-      
-      // Update buttons and progress
+
+      updateProgressBar();
       document.getElementById("prev-btn").disabled = current === 0;
       document.getElementById("next-btn").style.display = current < questions.length - 1 ? "block" : "none";
       document.getElementById("submit-btn").style.display = current === questions.length - 1 ? "block" : "none";
-      
-      updateProgressBar();
     }
 
     function nextQuestion() {
-      const currentQuestion = questions[current];
-      
-      if (!answers[currentQuestion.name]) {
+      if (!answers[questions[current].name]) {
         alert("Будь ласка, виберіть відповідь перед тим, як продовжити.");
         return;
       }
-      
       if (current < questions.length - 1) {
         current++;
         renderQuestion();
@@ -367,53 +345,48 @@
         renderQuestion();
       }
     }
-    
-    // Event handlers
-    document.getElementById("next-btn").addEventListener("click", nextQuestion);
-    document.getElementById("prev-btn").addEventListener("click", prevQuestion);
-    
-    document.getElementById("poll-form").addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      const currentQuestion = questions[current];
-      if (!answers[currentQuestion.name]) {
+
+    function submitPoll() {
+      if (!answers[questions[current].name]) {
         alert("Будь ласка, виберіть відповідь перед завершенням.");
         return;
       }
-      
-      // Prepare data for submission
-      document.getElementById("answers_json").value = JSON.stringify(answers);
-      
-      // Submit the form with fetch API
-      fetch(this.action, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      fetch("/submit-questionnaire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: document.getElementById("user_id").value,
           occupation: document.getElementById("occupation").value,
           answers: answers
         })
       })
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error('Network response was not ok');
-      })
+      .then(res => res.json())
       .then(data => {
-        // Redirect to results or thank you page
-        window.location.href = `/results?id=${data.id || ''}`;
+        if (data.status === "ok") {
+          window.location.href = "/psychologists";
+        } else {
+          alert("Сервер відповів помилкою: " + data.message);
+        }
       })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Сталася помилка при відправці даних. Спробуйте ще раз.');
+      .catch(err => {
+        console.error("Помилка відправки:", err);
+        alert("Сталася помилка при відправці даних."+ answers[0]);
       });
+    }
+
+    window.addEventListener("load", () => {
+      questions = allQuestions[occupation] || [];
+      document.getElementById("user_id").value = userId;
+      document.getElementById("occupation").value = occupation;
+
+      const storedName = localStorage.getItem("userName");
+      if (storedName) document.getElementById("user-name").textContent = storedName;
+
+      renderQuestion();
     });
 
-    // Initialize on page load
-    window.addEventListener('load', renderQuestion);
+    document.getElementById("next-btn").addEventListener("click", nextQuestion);
+    document.getElementById("prev-btn").addEventListener("click", prevQuestion);
   </script>
 </body>
 </html>

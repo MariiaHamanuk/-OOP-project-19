@@ -1,14 +1,147 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Рейтинг психологів - Beyond Duty</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-{% block content %}
-<h2>Рейтинг психологів</h2>
-<ul>
-  {% for p in psychologists %}
-    <li style="margin-bottom: 20px;">
-      <strong>{{ p.name }} {{ p.surname }}</strong><br>
-      <i>{{ p.bio }}</i><br>
-      <b>Рейтинг:</b> {{ p.rating }}
-    </li>
-  {% endfor %}
-</ul>
-{% endblock %}  11
+    body {
+      background-color: #f5f5f7;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 50px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-circle {
+      width: 30px;
+      height: 30px;
+      background-color: #50c6c2;
+      border-radius: 50%;
+    }
+
+    .logo-text {
+      color: #1e3a78;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: #666;
+    }
+
+    .profile-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .page-header {
+      background-color: #1e3a78;
+      color: white;
+      padding: 20px;
+      font-size: 1.5em;
+    }
+
+    .page-content {
+      padding: 30px;
+    }
+
+    .psychologist-list {
+      list-style-type: none;
+      margin-top: 20px;
+    }
+
+    .psychologist-list li {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .psychologist-list li:last-child {
+      border-bottom: none;
+    }
+
+    .psychologist-list a {
+      text-decoration: none;
+      color: #1e3a78;
+    }
+
+    .psychologist-list a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h3>psychologists</h3>
+  <nav class="navbar">
+    <a href="/" class="logo">
+      <div class="logo-circle"></div>
+      <span class="logo-text">BEYOND DUTY</span>
+    </a>
+    <div class="nav-links">
+      <a href="/events" class="nav-link">Календар подій</a>
+      <a href="/psychologists" class="nav-link">Ваші психологи</a>
+      <a href="/profile" class="profile-link">
+        <span>Олександр</span>
+        <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
+          <path d="M1 1L6 5L11 1" stroke="#666" stroke-width="1.5"/>
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <span>Рейтинг психологів</span>
+    </div>
+
+    <div class="page-content">
+      <ul class="psychologist-list">
+        {% for p in psychologists %}
+          <li>
+              <a href="{{ url_for('profile', username=p.username) }}">
+                  {{ "{}. {} rating: {}".format(loop.index, p.name, p.rating) }}
+              </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

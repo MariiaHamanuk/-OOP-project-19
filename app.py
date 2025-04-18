@@ -4,8 +4,8 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
-import json
 from collections import defaultdict
+from flask import jsonify
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -72,8 +72,11 @@ class Users(db.Model):
     bio = db.Column(db.Text)
     verified = db.Column(db.Boolean)
 
-    picture = db.Column(db.LargeBinary)
+    answers = db.relationship('Answer', back_populates='user', lazy=True)
+    answered = db.Column(db.Boolean)
     rating = db.Column(db.Float)
+#ДО ЦЬОГО МОМЕНТУ
+
     reviews_count = db.Column(db.Integer, default=0)
 
     # зв'язок з рейтингами
@@ -82,7 +85,7 @@ class Users(db.Model):
 
     events = db.relationship('Events', back_populates='user', lazy=True)
     def __init__(self, occupation, username, email, number, name, \
-surname, bio, password, verified=True, rating=None):
+surname, bio, password, verified=True, rating=None, answered=False):
         '''for positional arguments'''
         self.occupation = occupation
         self.username = username
@@ -97,6 +100,9 @@ surname, bio, password, verified=True, rating=None):
         self.verified = verified
 
         self.rating = rating
+
+        self.answered = answered
+
 
 class Events(db.Model):
     '''Events table'''
@@ -124,10 +130,13 @@ class Events(db.Model):
         self.user_id = user_id
         self.accepted = accepted
 
-# class Preferences(db.Model):
-#     '''Preferences table'''
-#     id = db.Column(db.Integer, primary_key=True)
+class Answer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question_number = db.Column(db.Integer)
+    answer_text = db.Column(db.Text, nullable=False)
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user = db.relationship('Users', back_populates='answers')
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
@@ -252,7 +261,6 @@ def validate_user():
 
     return redirect(url_for("login", error_message="Wrong password"))
 
-#all of the regex functions
 def validate_name(name):
     ''' complitad regex for username min. 3 char and max. 30, special
     characters can be allowed, if all characters are only special 
@@ -291,8 +299,6 @@ def validate_number(number):
     '''must be checked '''
     regex = r"^\+?[0-9]{10,15}$"
     return re.fullmatch(regex, number) is not None
-#all of the regex functions
-
 
 @app.route("/save", methods=["POST"])
 def save_user():
@@ -324,18 +330,11 @@ def save_user():
         return render_template(page, error_message="Invalid password format: Minimum 1 Big letter")
     if not validate_password_4(password):
         return render_template(page, error_message="Invalid password format: Minimum 1 small letter")
-    #, at least one uppercase letter, one lowercase letter, one number and one special character    if not validate_password(password):
-        # return render_template(page, error_message="Invalid password format")
 
     name = request.form.get("name")
-    #single name, WITHOUT spaces, WITH special characters
     if name:
         if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', name):
-            # if occupation != 'military':
                 return render_template(page, error_message="Invalid name must be between 1-30")
-    # no restriction to the size
-    #single name, WITHOUT spaces, WITH special characters
-    # no restriction to the size
     surname = request.form.get("surname")
     if surname:
         if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', surname):
@@ -371,8 +370,8 @@ if request.form.get("number") else None
 
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))   # військовий
-    rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))   # психолог
+    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     score = db.Column(db.Float, nullable=False)
 
 def calculate_influence_scores():
@@ -407,37 +406,58 @@ def update_user_rating(user_id):
         db.session.commit()
 @app.route("/psychologists")
 def psychologist_list():
+    current_user = Users.query.filter_by(username=session["user"]).first()
+
+    if current_user.occupation != "military":
+        return render_template("error.html", error_message="Лише для військових")
+
+    # if not current_user.questionnaire:
+    #     return redirect(url_for("questions"))
     rep_scores = calculate_psychologist_reputation()
     psychologists = Users.query.filter_by(occupation="psychologist").all()
-    # присвоїти рейтинги з rep_scores
+
+    # psychologists = [p for p in psychologists if p.questionnaire]
+    # psychologists = [p for p in psychologists]
     for p in psychologists:
         p.rating = rep_scores.get(p.id, 0.0)
-    # сортування
+
     psychologists_sorted = sorted(psychologists, key=lambda p: p.rating, reverse=True)
     return render_template("psychologists.html", psychologists=psychologists_sorted)
 
 @app.route("/questionnaire", methods=["GET", "POST"])
 def questions():
     user = Users.query.filter_by(username=session['user']).first()
-    # if request.method == "POST":
-    #     answers = json.loads(request.form["answers_json"])
-    #     print("Отримані відповіді:", answers)
-    #     q = Questionnaire.query.filter_by(user_id=user.id).first()
-    #     if not q:
-    #         q = Questionnaire(user_id=user.id)
-    #         db.session.add(q)
-
-    #     q.prefers_gender = answers.get("gender")
-    #     q.prefers_method = answers.get("method")
-    #     q.prefers_age_group = answers.get("age")
-    #     db.session.commit()
-
-    #     return redirect(url_for("main"))
-    # треба розібратися з бд 
-    user = Users.query.filter_by(username=session['user']).first()
     return render_template("questions.html", user=user)
-    # треба розібратися з бд 
 
+@app.route('/submit-questionnaire', methods=['POST'])
+def submit_questionnaire():
+    user = Users.query.filter_by(username=session['user']).first()
+    data = request.get_json()
+    print(data)
+    if not data:
+        return jsonify({"status": "error", "message": "Немає даних"}), 400
+
+    user_id = user.id
+    answers = data.get('answers')
+    print(user_id)
+    if not user_id or not answers:
+        return jsonify({"status": "error", "message": "Неправильні дані"}), 400
+
+    if not user:
+        return jsonify({"status": "error", "message": "Користувача не знайдено"}), 404
+
+    for q_num, answer_text in enumerate(answers.values(), start=1):
+        answer = Answer(
+            question_number=q_num,
+            answer_text=answer_text,
+            user_id=user_id
+        )
+        db.session.add(answer)
+
+    user.answered = True
+    db.session.commit()
+
+    return jsonify({"status": "ok"})
 @app.route("/psychologist/<username>", methods=["GET", "POST"])
 def view_psychologist(username):
     profile_user = Users.query.filter_by(username=username).first()  # психолог
@@ -633,17 +653,6 @@ def delete_account():
         logout()
 
     return redirect(url_for('settings', message="Неправильний пароль"))
-
-#add autodeletion for events
-#decomposition
-#rating system
-
-#email mailing
-#hashing passwords
-
-#regex
-#oauth
-#questions
 
 if __name__ == "__main__":
     create_tables()
