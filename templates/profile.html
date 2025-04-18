@@ -249,7 +249,18 @@
       </div>
     </div>
   </main>
-
+  {% if user.occupation == "psychologist" and current_user.occupation == "military" and user.username != session["user"] %}
+    <h3>Оцінка:</h3>
+    <form method="POST" action="{{ url_for('view_psychologist', username=user.username) }}">
+        <div id="stars" style="font-size: 24px; margin-bottom: 10px;">
+            {% for i in range(1, 6) %}
+                <span class="star" data-value="{{ i }}">&#9734;</span>
+            {% endfor %}
+        </div>
+        <input type="hidden" name="rating" id="rating-value" value="0">
+        <button type="submit">Надіслати оцінку</button>
+    </form>
+  {% endif %}
   <footer>
     <strong>Beyond Duty</strong><br>
     Напишіть відгук<br><br>
@@ -259,3 +270,18 @@
 
 </body>
 </html>
+<script>
+  const stars = document.querySelectorAll('.star');
+  const ratingInput = document.getElementById('rating-value');
+
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      const value = parseInt(star.dataset.value);
+      ratingInput.value = value;
+
+      stars.forEach(s => {
+        s.innerHTML = s.dataset.value <= value ? '★' : '☆';
+      });
+    });
+  });
+</script>

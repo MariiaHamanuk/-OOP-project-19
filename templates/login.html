@@ -211,9 +211,17 @@
                 <input type="password" id="password" name="password" placeholder="Пароль" required>
                 <button class="login-button" type="submit">Увійти</button>
             </form>
+
+
             <form action="{{ url_for('start') }}" method="GET" style="margin-top: 10px;">
                 <button class="back-button" type="submit">Назад</button>
             </form>
+            <a href="{{ url_for('google_login') }}" style="
+            text-align: center;
+        ">
+            
+                Увійти через Google
+        </a>
         </div>
     </div>
     <script>

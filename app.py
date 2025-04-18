@@ -3,6 +3,9 @@ import re
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from authlib.integrations.flask_client import OAuth
+from collections import defaultdict
+
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -14,7 +17,46 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:very_secure321@lo
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+oauth = OAuth(app)
 
+google = oauth.register(
+    name='google',
+    client_id='200018166534-78genr8bc0as1eq485m832fe76mvor26.apps.googleusercontent.com',
+    client_secret='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',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params={
+        'access_type': 'offline',
+        'prompt': 'consent'
+    },
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
+
+@app.route('/login/google')
+def google_login():
+    redirect_uri = url_for('google_auth', _external=True)
+    return google.authorize_redirect(redirect_uri)
+# треба прописати помилку, якщо не має акаунту
+@app.route('/auth/google')
+def google_auth():
+    try:
+        token = google.authorize_access_token()
+    except Exception as e:
+        print("Помилка", e)
+    user_info = google.get('userinfo').json()
+    email = user_info['email']
+    username = user_info.get('name', email.split('@')[0])
+
+    user = Users.query.filter_by(email=email).first()
+    if not user:
+        return render_template('login.html', error_message="No account with this username")
+    session['user'] = user.username
+    return redirect(url_for('main'))
 
 class Users(db.Model):
     '''Users table'''
@@ -34,13 +76,11 @@ class Users(db.Model):
     answered = db.Column(db.Boolean)
     rating = db.Column(db.Float)
 
-    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    who_rated = db.relationship(
-        'Users',
-        backref=db.backref('rated', remote_side=[id]),
-        lazy=True
-    )
+    reviews_count = db.Column(db.Integer, default=0)
 
+    # зв'язок з рейтингами
+    given_ratings = db.relationship("Rating", foreign_keys='Rating.rater_id', backref="rater", lazy=True)
+    received_ratings = db.relationship("Rating", foreign_keys='Rating.rated_id', backref="rated", lazy=True)
 
     events = db.relationship('Events', back_populates='user', lazy=True)
     answer = db.relationship('Answers', back_populates='user', uselist=False)
@@ -114,7 +154,7 @@ class Answers(db.Model):
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
-    restricted = ["/main", "/calendar", "/settings", "/questionnaire", "/logout"]
+    restricted = ["/main", "/calendar", "/settings", "/nnairequestio", "/logout"]
     if (request.path in restricted or re.match(r"^/profile/[^/]+$", request.path)) \
        and "user" not in session:
         return redirect(url_for("start"))
@@ -142,7 +182,7 @@ def logout_page():
 def main():
     '''main page'''
     user = Users.query.filter_by(username=session['user']).first()
-    top = top_psychologists()
+    top = rated_top()
     return render_template("main.html", occupation=user.occupation, top=top, user=user)
 
 @app.route("/calendar")
@@ -153,18 +193,54 @@ def calendar():
     occupation = user.occupation
     return render_template("calendar.html", occupation=occupation, events=events)
 
-@app.route("/questionnaire")
+@app.route("/questionnaire", methods=["GET", "POST"])
 def questions():
-    '''questionnaire page'''
-    return render_template("questions.html")
+    user = Users.query.filter_by(username=session['user']).first()
+    if user.answered:
+        redirect(url_for("psychologist_list"))
+    # if request.method == "POST":
+    #     answers = json.loads(request.form["answers_json"])
+    #     print("Отримані відповіді:", answers)
+    #     q = Questionnaire.query.filter_by(user_id=user.id).first()
+    #     if not q:
+    #         q = Questionnaire(user_id=user.id)
+    #         db.session.add(q)
 
-@app.route('/profile/<username>')
+    #     q.prefers_gender = answers.get("gender")
+    #     q.prefers_method = answers.get("method")
+    #     q.prefers_age_group = answers.get("age")
+    #     db.session.commit()
+
+    #     return redirect(url_for("main"))
+    # треба розібратися з бд 
+    user = Users.query.filter_by(username=session['user']).first()
+    return render_template("questions.html", user=user)
+    # треба розібратися з бд
+
+
+@app.route('/profile/<username>', methods=["GET", "POST"])
 def profile(username):
-    '''profile page'''
-    user = Users.query.filter_by(username=username).first()
-    if not user:
-        render_template("error.html", error_message="No user with this username")
-    return render_template('profile.html', user=user)
+    profile_user = Users.query.filter_by(username=username).first()
+    current_user = Users.query.filter_by(username=session["user"]).first()
+
+    if not profile_user:
+        return render_template("error.html", error_message="No user with this username")
+
+    if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
+        score = float(request.form["rating"])
+        existing = Rating.query.filter_by(rater_id=current_user.id, rated_id=profile_user.id).first()
+
+        if existing:
+            existing.score = score
+        else:
+            rating = Rating(rater_id=current_user.id, rated_id=profile_user.id, score=score)
+            db.session.add(rating)
+            current_user.reviews_count += 1
+
+        db.session.commit()
+        return redirect(url_for("profile", username=username))
+
+    return render_template('profile.html', user=profile_user, current_user=current_user)
 
 @app.route("/settings")
 def settings():
@@ -225,19 +301,91 @@ def validate_user():
 
     return redirect(url_for("login", error_message="Wrong password"))
 
+def validate_name(name):
+    ''' complitad regex for username min. 3 char and max. 30, special
+    characters can be allowed, if all characters are only special 
+    characters it should return false'''
+    if not name:
+        return None
+    regex = "^[A-Za-z0-9]{1,30}$"
+    return re.fullmatch(regex, name) is not None
+
+def validate_email(email):
+    '''regex for email'''
+    regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    return re.fullmatch(regex, email) is not None
+
+def validate_password_1(password):
+    '''Minimum eight and maximum 10 characters, at least one
+    uppercase letter, one lowercase letter, one number and one special character:'''
+    regex = r"^.{8,20}$"
+    return re.fullmatch(regex, password) is not None
+def validate_password_2(password):
+    '''Minimum eight and maximum 10 characters, at least one
+    uppercase letter, one lowercase letter, one number and one special character:'''
+    regex = r"^(?=.*\d).+$"
+    return re.fullmatch(regex, password) is not None
+def validate_password_3(password):
+    '''Minimum eight and maximum 10 characters, at least one
+    uppercase letter, one lowercase letter, one number and one special character:'''
+    regex = r"^(?=.*[A-Z]).+$"
+    return re.fullmatch(regex, password) is not None
+def validate_password_4(password):
+    '''Minimum eight and maximum 10 characters, at least one
+    uppercase letter, one lowercase letter, one number and one special character:'''
+    regex = r"^[a-zA-Z0-9]+$"
+    return re.fullmatch(regex, password) is not None
+def validate_number(number):
+    '''must be checked '''
+    regex = r"^\+?[0-9]{10,15}$"
+    return re.fullmatch(regex, number) is not None
+
 @app.route("/save", methods=["POST"])
 def save_user():
     '''saves user to file'''
     occupation = request.form["occupation"]
-
+    match occupation:
+        case 'military':
+            page = "m-register.html"
+        case "psychologist":
+            page = "ps-register.html"
+        case "volunteer":
+            page = "v-register.html"
     username = request.form["username"]
+
+    if not validate_name(username):
+        return render_template(page, error_message="Invalid username")
+
     email = request.form["email"]
+
+    if not validate_email(email):
+        return render_template(page, error_message="Invalid email format")
+
     password = request.form["password"]
+    if not validate_password_1(password):
+        return render_template(page, error_message="Invalid password format: Minimum 8 and maximum 20 characters")
+    if not validate_password_2(password):
+        return render_template(page, error_message="Invalid password format: Minimum 1 digit")
+    if not validate_password_3(password):
+        return render_template(page, error_message="Invalid password format: Minimum 1 Big letter")
+    if not validate_password_4(password):
+        return render_template(page, error_message="Invalid password format: Minimum 1 small letter")
 
     name = request.form.get("name")
+    if name:
+        if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', name):
+                return render_template(page, error_message="Invalid name must be between 1-30")
     surname = request.form.get("surname")
+    if surname:
+        if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', surname):
+            return render_template(page, error_message="Invalid surname must be between 1- 30")
+
     bio = request.form.get("bio")
-    number = re.sub(r"[^0-9]", "", request.form.get("number")) \
+    if bio:
+        if not re.fullmatch(r'^.{1,500}$', bio):
+            if occupation != 'military':
+                return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
+    number = re.sub(r"[^0-9]", "", request.form.get("number"))\
 if request.form.get("number") else None
 
     match occupation:
@@ -281,7 +429,98 @@ def create_tables():
     with app.app_context():
         db.create_all()
 
+class Rating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    score = db.Column(db.Float, nullable=False)
+
+def calculate_influence_scores():
+    ratings = Rating.query.all()
+    user_influence = defaultdict(int)
+
+    for r in ratings:
+        user_influence[r.user_id] += 1
+
+    return user_influence
+
+def calculate_psychologist_reputation():
+    ratings = Rating.query.all()
+    scores = defaultdict(lambda: [0, 0])  # rated_id: [total_weighted, total_weight]
+
+    for r in ratings:
+        weight = r.rater.reviews_count or 1
+        scores[r.rated_id][0] += r.score * weight
+        scores[r.rated_id][1] += weight
+
+    reputations = {}
+    for pid, (total, weight) in scores.items():
+        reputations[pid] = round(total / weight, 2) if weight > 0 else 0.0
+
+    return reputations
+def update_user_rating(user_id):
+    '''оновлює рейтинг психолога в Users після оцінки'''
+    rep_scores = calculate_psychologist_reputation()
+    user = Users.query.get(user_id)
+    if user:
+        user.rating = rep_scores.get(user.id, 0.0)
+        db.session.commit()
+@app.route("/psychologists")
+def psychologist_list():
+    current_user = Users.query.filter_by(username=session["user"]).first()
+
+    # якщо він не військовий — обмеж доступ
+    if current_user.occupation != "military":
+        return render_template("error.html", error_message="Лише для військових")
+
+    # перевірка, чи пройшов опитування
+    # if not current_user.answered:
+    #     return redirect(url_for("questions"))
+
+    # фільтрувати  тих психологів, хто заповнив анкету
+    rep_scores = calculate_psychologist_reputation()
+    psychologists = Users.query.filter_by(occupation="psychologist").all()
+
+    # psychologists = [p for p in psychologists if p.answered]
+    psychologists = [p for p in psychologists]
+    for p in psychologists:
+        p.rating = rep_scores.get(p.id, 0.0)
+
+    psychologists_sorted = sorted(psychologists, key=lambda p: p.rating, reverse=True)
+    return render_template("psychologists.html", psychologists=psychologists_sorted)
+
+
+
+@app.route("/psychologist/<username>", methods=["GET", "POST"])
+def view_psychologist(username):
+    profile_user = Users.query.filter_by(username=username).first()  # психолог
+    current_user = Users.query.filter_by(username=session['user']).first()  # військовий
+
+    if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
+        score = float(request.form["rating"])
+
+        existing = Rating.query.filter_by(rater_id=current_user.id, rated_id=profile_user.id).first()
+        if existing:
+            existing.score = score
+        else:
+            new_rating = Rating(rater_id=current_user.id, rated_id=profile_user.id, score=score)
+            db.session.add(new_rating)
+            current_user.reviews_count = (current_user.reviews_count or 0) + 1
+
+        db.session.commit()
+        update_user_rating(profile_user.id)
+
+        return redirect(url_for("profile", username=username))
+
+    return render_template("profile.html", user=profile_user, current_user=current_user)
 def top_psychologists():
+    '''sort psycholists by rating'''
+    psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
+    if psychologists:
+        return sorted(sorted(psychologists, key=lambda p: p.username),\
+key=lambda p: p.rating, reverse=True)[:3]
+
+def rated_top():
     '''sort psycholists by rating'''
     psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
     if psychologists:
@@ -433,6 +672,49 @@ def delete_account():
         logout()
 
     return redirect(url_for('settings', message="Неправильний пароль"))
+
+@app.route("/api/submit-questionnaire", methods=["POST"])
+def submit_questionnaire():
+    data = request.get_json()
+
+    user = Users.query.filter_by(username=session.get("user")).first()
+
+    answers = data.get("answers", {})
+    occupation = data.get("occupation")
+
+    def to_bool(val):
+        return val.strip().lower() == "так" or al.strip().lower() == 'англійська'
+
+    age_map = {
+        "До 30": 25,
+        "30–50": 40,
+        "50+": 60
+    }
+
+    # Отримання полів
+    experience = to_bool(answers.get("military_exp", "ні"))
+    online = to_bool(answers.get("format", "ні"))
+    activities = to_bool(answers.get("activities", "ні"))
+    english = to_bool(answers.get("language", "ні" if occupation == "military" else "так"))
+    good_age = age_map.get(answers.get("age"))
+
+    # Створення запису в базу  # заміни на твій модуль, якщо є окремий
+    new_answer = Answers(
+        online=online,
+        experience=experience,
+        activities=activities,
+        good_age=good_age,
+        english=english,
+        user_id=user.id
+    )
+
+    db.session.add(new_answer)
+    db.session.commit()
+
+    user.answered = True
+    db.session.commit()
+
+    return redirect(url_for('psychologist_list'))
 
 #decomposition
 

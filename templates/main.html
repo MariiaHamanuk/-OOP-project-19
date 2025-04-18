@@ -225,6 +225,11 @@
       <h2>найближчі події:</h2>
       <div class="event-list" id="events-list"></div>
     </section>
+    {% if occupation == "admin" %}
+        <a href="{{ url_for('verify_page') }}">
+            <button> Верифікація користувачів і подій </button>
+        </a>
+    {% endif %}
   </main>
 
   <footer>
@@ -302,9 +307,9 @@
         href: '/questionnaire'
       },
       psychologist: {
-        text: 'Переглянути події',
-        href: '/calendar'
-      },
+        text: 'Пройти опитування',
+        href: '/questionnaire'
+      },  
       volunteer: {
         text: 'Додати подію',
         href: '/calendar'
