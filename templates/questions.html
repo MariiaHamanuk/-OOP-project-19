@@ -221,7 +221,7 @@
       <div class="poll-footer">
         <button type="button" class="btn btn-secondary" id="prev-btn" disabled>Назад</button>
         <button type="button" class="btn btn-primary" id="next-btn">Далі</button>
-        <button type="button" onclick="submitPoll()">Завершити</button>
+        <button type="button" class="submit-btn"id="submit-btn" onclick="submitPoll()">Завершити</button>
       </div>
 
       <input type="hidden" name="user_id" id="user_id">
@@ -255,7 +255,7 @@
           options: ["Українською", "Англійською"],
           name: "language"
         },
-        {
+                {
           text: "Чи бажаєте ви відвідувати заходи з іншими ветеранами?",
           options: ["Так", "Ні"],
           name: "group_sessions"
@@ -300,6 +300,7 @@
       const q = questions[current];
       const answersDiv = document.getElementById("answers");
       document.getElementById("question-text").innerText = q.text;
+      
       answersDiv.innerHTML = "";
 
       q.options.forEach(opt => {
@@ -315,7 +316,14 @@
         btn.onclick = () => {
           document.querySelectorAll(".answer-button").forEach(b => b.classList.remove("selected"));
           btn.classList.add("selected");
+          // if (opt == "Так") {
+          //   answers[q.name] = opt;
+          // }
+          // else {
+          //   answers[q.name] = False;
+          // }
           answers[q.name] = opt;
+
           console.log("Збережено:", answers);
         };
 
@@ -350,6 +358,22 @@
       if (!answers[questions[current].name]) {
         alert("Будь ласка, виберіть відповідь перед завершенням.");
         return;
+      }
+      for (const key in answers) {
+        if (answers[key] === "Так" || answers[key] === "Англійська") {
+          answers[key] = true; 
+        } else if (answers[key] === "Ні" || answers[key] === "Українська") {
+          answers[key] = false;
+        }
+        else if(answers[key] === "до 30") {
+          answers[key] = 30;
+        }
+        else if(answers[key] === "30-50") {
+          answers[key] = 50;
+        }
+        else if(answers[key] === "50+") {
+          answers[key] = 150;
+        }
       }
       fetch("/submit-questionnaire", {
         method: "POST",

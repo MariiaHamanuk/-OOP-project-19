@@ -446,13 +446,18 @@ def submit_questionnaire():
     if not user:
         return jsonify({"status": "error", "message": "Користувача не знайдено"}), 404
 
-    for q_num, answer_text in enumerate(answers.values(), start=1):
-        answer = Answer(
-            question_number=q_num,
-            answer_text=answer_text,
-            user_id=user_id
-        )
-        db.session.add(answer)
+    for idx, (question_key, response) in enumerate(answers.items(), start=1):
+        existing_answer = Answer.query.filter_by(user_id=user_id, question_number=idx).first()
+
+        if existing_answer:
+            existing_answer.answer_text = response
+        else:
+            new_answer = Answer(
+                question_number=idx,
+                answer_text=response,
+                user_id=user_id
+            )
+            db.session.add(new_answer)
 
     user.answered = True
     db.session.commit()
