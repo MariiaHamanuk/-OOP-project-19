@@ -271,17 +271,18 @@
 </body>
 </html>
 <script>
-  const stars = document.querySelectorAll('.star');
-  const ratingInput = document.getElementById('rating-value');
-
-  stars.forEach(star => {
-    star.addEventListener('click', () => {
-      const value = parseInt(star.dataset.value);
-      ratingInput.value = value;
-
-      stars.forEach(s => {
-        s.innerHTML = s.dataset.value <= value ? '★' : '☆';
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('rating-value');
+  
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const value = parseInt(star.dataset.value);
+        ratingInput.value = value;
+  
+        stars.forEach(s => {
+          s.innerHTML = s.dataset.value <= value ? '★' : '☆';
+        });
       });
     });
-  });
-</script>
+  </script>
+  
