@@ -14,17 +14,6 @@
             margin: 0;
             background-color: #222;
         }
-        .header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-        }
 
         .container {
             display: flex;
@@ -56,23 +45,21 @@
             flex-direction: column;
             justify-content: center;
             padding: 40px;
-            padding-top: 180px;
+            padding-top: 160px;
         }
         h3 {
-            text-align: right;
-            padding-right: 190px;
+            text-align: center;
             color: #6ec6c4;
             font-family: 'Courier New';
-            margin-bottom: 100px;
-            position: absolute;
-            top: 180px;
-            left: 935px;
+            position: relative;
+            margin-top: 10px;
+            margin-left: 400px;
         }
         form {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            margin-top: 50px;
+            margin-top: 20px;
         }
         input {
             width: 50%;
@@ -85,6 +72,9 @@
             width: 20%;
             background: #6ec6c4;
             color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             border: none;
             padding: 10px 70px;
             border-radius: 20px;
@@ -96,11 +86,10 @@
         }
         .toggle-container {
             display: flex;
-            position: absolute;
-            top: 240px;
-            left: 845px;
-            align-items: flex-end;
-            margin-bottom: 20px;
+            position: relative;
+            justify-content: center;
+            align-items: center;
+            margin-left: 400px;
         }
         .switch-input {
             display: none;
@@ -157,6 +146,7 @@
             text-align: right;
             /* padding-right: 190px; */
         }
+
     </style>
 </head>
 <body>
@@ -166,9 +156,12 @@
         </div>
         <div class="right">
             <h3>beyond duty</h3>
-            <div class="switch">
-                <button>Маю аккаунт</button>
-                <button>Не маю аккаунт</button>
+            <div class="toggle-container">
+                <input type="checkbox" id="account-toggle" class="switch-input" checked>
+                <label for="account-toggle" class="switch-label">
+                    <span class="left_sw">Я маю акаунт</span>
+                    <span class="right_sw">Я не маю акаунт</span>
+                </label>
             </div>
             <form action="/save" method="POST">
                 <input type="hidden" id="occupation" name="occupation" value="psychologist">
@@ -183,13 +176,6 @@
                     <p class="error-message">{{ error_message }}</p>
                 {% endif %}
                 <button class="login-button" type="submit">Надіслати</button>
-                <div class="toggle-container">
-                    <input type="checkbox" id="account-toggle" class="switch-input">
-                    <label for="account-toggle" class="switch-label">
-                        <span class="left_sw">Я маю акаунт</span>
-                        <span class="right_sw">Я не маю акаунт</span>
-                    </label>
-                </div>
             </form>
             <form action="{{ url_for('start') }}" method="GET" style="margin-top: 10px;">
                 <button class="back-button" type="submit">Назад</button>
