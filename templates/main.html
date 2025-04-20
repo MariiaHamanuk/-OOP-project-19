@@ -218,7 +218,15 @@
 
     <section class="top-psychologists">
       <h2>Топ наших психологів:</h2>
-      <div class="psychologist-list" id="psychologists-list"></div>
+      <div class="psychologist-list" id="psychologists-list">
+        {% for p in topp %}
+          <li>
+              <a href="{{ url_for('profile', username=p.username) }}">
+                  {{ "{}. {} rating: {}".format(loop.index, p.name, p.rating) }}
+              </a>
+          </li>
+        {% endfor %}
+      </div>
     </section>
     <a href="{{ url_for('psychologist_list') }}">
       <button> психологи за вашими вподобаннями </button>

@@ -169,9 +169,18 @@ def logout_page():
 @app.route("/main")
 def main():
     '''main page'''
+    reputations = calculate_psychologist_reputation()
+    all_psychologists = Users.query.filter_by(occupation="psychologist").all() 
+    psychologist_list = sorted(all_psychologists, key=lambda p: reputations.get(p.id, 0),
+    reverse=True)
+    topp  = []
+    for i in range(3):
+        if len(psychologist_list) > i:
+            topp.append(psychologist_list[i])
     user = Users.query.filter_by(username=session['user']).first()
     top = rated_top()
-    return render_template("main.html", occupation=user.occupation, top=top, user=user)
+
+    return render_template("main.html", occupation=user.occupation, top=top, user=user, topp=topp)
 
 @app.route("/calendar")
 def calendar():
