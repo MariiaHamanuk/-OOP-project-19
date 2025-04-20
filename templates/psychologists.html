@@ -105,6 +105,26 @@
     .psychologist-list a:hover {
       text-decoration: underline;
     }
+    .go-home-wrapper {
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .go-home-btn {
+      display: inline-block;
+      padding: 12px 100px;
+      background-color: #50c6c2;
+      color: white;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .go-home-btn:hover {
+      background-color: #3fb0ac;
+    }
+
   </style>
 </head>
 <body>
@@ -114,8 +134,8 @@
       <span class="logo-text">BEYOND DUTY</span>
     </a>
     <div class="nav-links">
-      <a href="/events" class="nav-link">Календар подій</a>
-      <a href="/psychologists" class="nav-link">Ваші психологи</a>
+      <a href="/calendar" class="nav-link">Календар подій</a>
+      <a href="/psychologists" class="nav-link">Психологи</a>
       <a href="/profile" class="profile-link">
         <span>Профіль</span>
         <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
@@ -141,6 +161,10 @@
         {% endfor %}
       </ul>
     </div>
+
+  </div>
+  <div class="go-home-wrapper">
+    <a href="/main" class="go-home-btn">На головну</a>
   </div>
 </body>
 </html>
