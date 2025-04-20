@@ -71,6 +71,7 @@ class Users(db.Model):
     surname = db.Column(db.String(50))
     bio = db.Column(db.Text)
     verified = db.Column(db.Boolean)
+    age = db.Column(db.Integer)
 
     answers = db.relationship('Answer', back_populates='user', lazy=True)
     answered = db.Column(db.Boolean)
@@ -85,7 +86,7 @@ class Users(db.Model):
 
     events = db.relationship('Events', back_populates='user', lazy=True)
     def __init__(self, occupation, username, email, number, name, \
-surname, bio, password, verified=True, rating=None, answered=False):
+surname, bio, age, password, verified=True, rating=None, answered=False):
         '''for positional arguments'''
         self.occupation = occupation
         self.username = username
@@ -95,7 +96,7 @@ surname, bio, password, verified=True, rating=None, answered=False):
         self.name = name
         self.surname = surname
         self.bio = bio
-
+        self.age = age
         self.password = password #add hashing
         self.verified = verified
 
@@ -135,7 +136,7 @@ class Answer(db.Model):
     question_number = db.Column(db.Integer)
     answer_text = db.Column(db.Text, nullable=False)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('Users', back_populates='answers')
 @app.before_request
 def restricted_pages():
@@ -347,13 +348,19 @@ def save_user():
                 return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number"))\
 if request.form.get("number") else None
+    age = request.form.get("age")
+    if age:
+        if not isinstance(age, int):
+            if int(age) > 150 or int(age) < 5:
+                return render_template(page, error_message="Invalid age, you mast be older than 5")
 
     match occupation:
+
         case 'military':
-            user = Users(occupation, username, email, number, name, surname, bio, password, True)
+            user = Users(occupation, username, email, number, name, surname, bio, age, password, True)
             page = "m_register"
         case "psychologist":
-            user = Users(occupation, username, email, number, name, surname, bio,password,False,0.0)
+            user = Users(occupation, username, email, number, name, surname, bio, age, password,False,0.0)
             page = "ps_register"
         case "volunteer":
             user = Users(occupation, username, email, number, name, surname, bio, password, False)
@@ -385,8 +392,7 @@ def calculate_influence_scores():
 
 def calculate_psychologist_reputation():
     ratings = Rating.query.all()
-    scores = defaultdict(lambda: [0, 0])  # rated_id: [total_weighted, total_weight]
-
+    scores = defaultdict(lambda: [0, 0])  # rated_id: [total_weighted, total_weight]    
     for r in ratings:
         weight = r.rater.reviews_count or 1
         scores[r.rated_id][0] += r.score * weight
@@ -398,31 +404,47 @@ def calculate_psychologist_reputation():
 
     return reputations
 def update_user_rating(user_id):
-    '''оновлює рейтинг психолога в Users після оцінки'''
-    rep_scores = calculate_psychologist_reputation()
+    """Оновлює рейтинг психолога на основі зваженого середнього значення"""
+    ratings = Rating.query.filter_by(rated_id=user_id).all()
+
+    if not ratings:
+        return  # Якщо немає оцінок, нічого не оновлюємо
+
+    weighted_sum = 0
+    total_weight = 0
+
+    for r in ratings:
+        weight = r.rater.reviews_count or 1  # Якщо не вказано, беремо вагу 1
+        weighted_sum += r.score * weight
+        total_weight += weight
+
+    final_score = round(weighted_sum / total_weight, 2) if total_weight > 0 else 0.0
+
     user = Users.query.get(user_id)
     if user:
-        user.rating = rep_scores.get(user.id, 0.0)
+        user.rating = final_score
         db.session.commit()
 @app.route("/psychologists")
 def psychologist_list():
     current_user = Users.query.filter_by(username=session["user"]).first()
-
-    if current_user.occupation != "military":
+    if current_user.occupation == "volunteer":
         return render_template("error.html", error_message="Лише для військових")
-
-    # if not current_user.questionnaire:
-    #     return redirect(url_for("questions"))
-    rep_scores = calculate_psychologist_reputation()
-    psychologists = Users.query.filter_by(occupation="psychologist").all()
-
-    # psychologists = [p for p in psychologists if p.questionnaire]
-    # psychologists = [p for p in psychologists]
-    for p in psychologists:
-        p.rating = rep_scores.get(p.id, 0.0)
-
-    psychologists_sorted = sorted(psychologists, key=lambda p: p.rating, reverse=True)
-    return render_template("psychologists.html", psychologists=psychologists_sorted)
+    user_answers = {a.question_number: a.answer_text for a in current_user.answers}
+    with db.session.no_autoflush:
+        all_psychologists = Users.query.filter_by(occupation="psychologist").all()
+    matched_psychologists = []
+    for p in all_psychologists:
+        with db.session.no_autoflush:
+            p_answers = {a.question_number: a.answer_text for a in p.answers}
+            print(p_answers)
+        if user_answers == p_answers:
+            matched_psychologists.append(p)
+    reputations = calculate_psychologist_reputation()
+    psychologist_list = sorted(matched_psychologists, key=lambda p: reputations.get(p.id, 0),
+    reverse=True)
+    if not matched_psychologists:
+        return render_template("error.html", error_message="Поки що не знайшли підходящого психолога для Вас.")
+    return render_template("psychologists.html", psychologists=psychologist_list)
 
 @app.route("/questionnaire", methods=["GET", "POST"])
 def questions():
@@ -445,20 +467,24 @@ def submit_questionnaire():
 
     if not user:
         return jsonify({"status": "error", "message": "Користувача не знайдено"}), 404
-
+    lst = []
     for idx, (question_key, response) in enumerate(answers.items(), start=1):
         existing_answer = Answer.query.filter_by(user_id=user_id, question_number=idx).first()
 
         if existing_answer:
             existing_answer.answer_text = response
+            lst.append(response)
+            # user.answers[idx] = response
         else:
+            lst.append(response)
+
             new_answer = Answer(
                 question_number=idx,
                 answer_text=response,
                 user_id=user_id
             )
             db.session.add(new_answer)
-
+    # user.answers = lst
     user.answered = True
     db.session.commit()
 
@@ -627,6 +653,7 @@ def update_info():
 
     username = request.form.get("username")
     bio = request.form.get("bio")
+    age = request.form.get("age")
     email = request.form.get("email")
     number = request.form.get("number")
     new_password = request.form.get("new_password")
@@ -636,6 +663,7 @@ def update_info():
     if user.password == request.form["password"]:
         user.username = username if username else user.username
         user.bio = bio if bio else user.bio
+        user.age = age if age else user.age
         user.email = email if email else user.email
         user.number = number if number else user.number
         user.password = new_password if new_password else user.password

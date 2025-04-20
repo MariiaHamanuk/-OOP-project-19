@@ -14,6 +14,9 @@
     <a href="{{ url_for('settings') }}">
         <button> Настройки </button>
     </a>
+    <a href="{{ url_for('psychologist_list') }}">
+        <button> psychologist-list </button>
+    </a>
     {% if occupation == "admin" %}
         <a href="{{ url_for('verify_page') }}">
             <button> Верифікація користувачів і подій </button>
