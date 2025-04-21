@@ -51,8 +51,7 @@
 <body>
     {% if message %}
     <div class="message-container">
-        <h1>Дякуємо!</h1>
-        <p>{{ message }}</p>
+        <h1>{{ message }}</h1>
         <button class="back-button" onclick="window.location.href='/calendar'">До календаря</button>
     </div>
     {% endif %}
