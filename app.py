@@ -438,7 +438,7 @@ def psychologist_list():
     reputations = calculate_psychologist_reputation()
     psychologist_list = sorted(matched_psychologists, key=lambda p: reputations.get(p.id, 0),
     reverse=True)
-    if unmatched_psychologists:
+    if not matched_psychologists:
         return render_template("error.html", error_message="Поки що не знайшли підходящого психолога для Вас.")
     return render_template("psychologists.html", psychologists=psychologist_list)
 
