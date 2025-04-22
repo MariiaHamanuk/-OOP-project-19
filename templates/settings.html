@@ -19,12 +19,22 @@
       color: #1e3a78;
     }
 
-    input, textarea {
+    input {
       width: 50%;
       padding: 10px;
       margin: 10px 0;
       border: 1px solid #6ec6c4;
       border-radius: 15px;
+    }
+    textarea {
+      width: 50%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #6ec6c4;
+      border-radius: 15px;
+      resize: none;
+      min-height: 10px;
+      overflow: hidden;
     }
 
     .submit-button, .back-button {
@@ -39,6 +49,18 @@
 
     .submit-button:hover {
       background-color: #4b9391;
+    }
+    .delete-button{
+      width: 51%;
+      padding: 10px;
+      background-color: #d9534f;
+      margin: 10px 0;
+      border: 1px solid #d9534f;
+      border-radius: 15px;
+      cursor: pointer;
+    }
+    .delete-button:hover{
+      background-color: #973b37;
     }
 
     .back-button {
@@ -100,6 +122,19 @@
       font-weight: bold;
       margin-bottom: 20px;
     }
+
+    #char-count {
+      font-size: 14px;
+      color: gray;
+      text-align: right;
+      margin: 0;
+      margin-top: -5px;
+      margin-bottom: 10px;
+      width: 50%;
+    }
+    #char-count.over-limit {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -129,7 +164,8 @@
       <input type="text" id="number" name="number" placeholder="{{ user.number }}"><br>
 
       <label for="bio">Опис (біо):</label><br>
-      <textarea id="bio" name="bio" rows="4" placeholder="{{ user.bio }}"></textarea><br>
+      <textarea id="bio" name="bio" rows="4" placeholder="{{ user.bio }}" maxlength="500"></textarea><br>
+      <p id="char-count">0 / 300</p>
 
       <label for="password">Поточний пароль:</label><br>
       <input type="password" id="password" name="password" placeholder="*обов'язково"required><br>
@@ -148,12 +184,43 @@
 <form method="POST" action="{{ url_for('delete_account') }}" onsubmit="return confirm('Ви впевнені, що хочете видалити акаунт? Цю дію не можна скасувати.');">
   <label for="delete_password">Підтвердіть пароль для видалення акаунту:</label><br>
   <input type="password" id="delete_password" name="password" placeholder="*обов'язково"><br>
-  <button type="submit" class="submit-button" style="background-color: #d9534f; border-color: #d9534f;">
+  <button type="submit" class="delete-button">
     Видалити акаунт
   </button>
 </form>
 
   </div>
-
+    <script>
+      const bio = document.getElementById("bio");
+      const counter = document.getElementById("char-count");
+      const maxLength = 300;
+      
+      function updateCounter() {
+          const length = bio.value.length;
+          counter.textContent = `${length} / ${maxLength}`;
+          if (length > maxLength) {
+              counter.classList.add("over-limit");
+          } else {
+              counter.classList.remove("over-limit");
+          }
+      }
+      
+      function autoResizeTextarea() {
+          bio.style.height = "auto";
+          bio.style.height = bio.scrollHeight + "px";
+      }
+      
+      bio.addEventListener("input", () => {
+          updateCounter();
+          autoResizeTextarea();
+      });
+      
+      // Ініціалізація при завантаженні
+      window.addEventListener("DOMContentLoaded", () => {
+          updateCounter();
+          autoResizeTextarea();
+      });
+      
+      </script>
 </body>
 </html>
