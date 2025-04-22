@@ -10,7 +10,7 @@ from authlib.integrations.flask_client import OAuth
 app = Flask(__name__)
 app.secret_key = "very_secure123"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:very_secure321@localhost:5432/base'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Olalaiamfine5162@localhost:5432/base'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = False
 db = SQLAlchemy(app)
@@ -156,12 +156,12 @@ class Answer(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('Users', back_populates='answers')
-    def __init__(self, id, question_number, answer_text, user_id, user):
-        self.id = id
-        self.question_number = question_number
-        self.answer_text = answer_text
-        self.user_id = user_id
-        self.user = user
+    # def __init__(self, id, question_number, answer_text, user_id, user):
+    #     self.id = id
+    #     self.question_number = question_number
+    #     self.answer_text = answer_text
+    #     self.user_id = user_id
+    #     self.user = user
 
 class Rating(db.Model):
     '''
@@ -172,11 +172,11 @@ class Rating(db.Model):
     rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     score = db.Column(db.Float, nullable=False)
 
-    def __init__(self, id, rater_id, rated_id, score):
-        self.id = id
-        self.rater_id = rater_id
-        self.rated_id = rated_id
-        self.score = score
+    # def __init__(self, id, rater_id, rated_id, score):
+    #     self.id = id
+    #     self.rater_id = rater_id
+    #     self.rated_id = rated_id
+    #     self.score = score
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
