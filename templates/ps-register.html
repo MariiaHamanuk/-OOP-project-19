@@ -52,7 +52,7 @@
             color: #6ec6c4;
             font-family: 'Courier New';
             position: relative;
-            margin-top: 10px;
+            margin-top: -70px;
             margin-left: 400px;
         }
         form {
@@ -171,6 +171,19 @@
         #char-count.over-limit {
             color: red;
         }
+        .show-password-checkbox {
+            position: absolute;
+            top: 18%;
+            right: 60px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .show-password-checkbox:checked {
+            background-color: #6ec6c4;
+            border-color: #6ec6c4;
+        }
 
 
     </style>
@@ -198,7 +211,11 @@
                 <input type="email" name="email" placeholder="Ваш email" required>
                 <textarea id="bio" name="bio" placeholder="Розкажіть про себе" maxlength="500" required></textarea>
                 <p id="char-count">0 / 300</p>
-                <input type="password" id="password" name="password" placeholder="Пароль" required>
+                <div style="position: relative; width: 50%;">
+                    <input type="password" id="password" name="password" placeholder="Пароль" required
+                        style="width: 100%; padding-right: 10px; margin-left: -20px;">
+                    <input type="checkbox" id="show-password" class="show-password-checkbox">
+                </div>
                 {% if error_message %}
                     <p class="error-message">{{ error_message }}</p>
                 {% endif %}
@@ -275,6 +292,12 @@ bio.addEventListener("input", () => {
 window.addEventListener("DOMContentLoaded", () => {
     updateCounter();
     autoResizeTextarea();
+});
+const showPasswordCheckbox = document.getElementById("show-password");
+const passwordInput = document.getElementById("password");
+
+showPasswordCheckbox.addEventListener("change", function () {
+    passwordInput.type = this.checked ? "text" : "password";
 });
 
     </script>

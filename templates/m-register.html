@@ -147,6 +147,19 @@
             text-align: right;
             /* padding-right: 190px; */
         }
+        .show-password-checkbox {
+            position: absolute;
+            top: 18%;
+            right: 60px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .show-password-checkbox:checked {
+            background-color: #6ec6c4;
+            border-color: #6ec6c4;
+        }
 
     </style>
 </head>
@@ -168,7 +181,11 @@
                 <input type="hidden" id="occupation" name="occupation" value="military">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
-                <input type="password" id="password" name="password" placeholder="Пароль" required>
+                <div style="position: relative; width: 50%;">
+                    <input type="password" id="password" name="password" placeholder="Пароль" required
+                        style="width: 100%; padding-right: 10px; margin-left: -20px;">
+                    <input type="checkbox" id="show-password" class="show-password-checkbox">
+                </div>
                 {% if error_message %}
                     <p class="error-message">{{ error_message }}</p>
                 {% endif %}
@@ -212,6 +229,12 @@
                 rightSw.style.color = "black";
             }
         }
+        const passwordInput = document.getElementById("password");
+const showPasswordCheckbox = document.getElementById("show-password");
+
+showPasswordCheckbox.addEventListener("change", function () {
+    passwordInput.type = this.checked ? "text" : "password";
+});
     </script>
 </body>
 </html>
