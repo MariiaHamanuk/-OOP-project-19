@@ -175,26 +175,63 @@
       color: white;
       text-align: center;
       padding: 50px 20px;
-      margin-top: 60px;
+      margin-top: 150px;
+    }
+    .rating-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 60px;
+      width: 300px;
     }
 
-    footer input {
-      padding: 10px 20px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      margin-right: 10px;
-      font-size: 14px;
-      outline: none;
-      width: 200px;
+    .profile-card {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
     }
 
-    footer .button {
-      background-color: #6ddbd4;
-      padding: 10px 20px;
-      border-radius: 20px;
-      border: none;
+    .rating-section h3 {
+      font-size: 18px;
       font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .stars-container {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .star {
       cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .star:hover {
+      color: #6ddbd4;
+    }
+
+    .submit-rating {
+      background-color: #6ddbd4;
+      color: #0A1D4E;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .submit-rating:hover {
+      background-color: #9aeae4;
+    }
+
+    .avatar-small {
+      width: 35px;
+      height: 35px;
+      background-color: #ccc;
+      border-radius: 50%;
     }
   </style>
 </head>
@@ -208,11 +245,12 @@
     <nav>
       <a href="/calendar" style="text-decoration: none; color: inherit;">Календар подій</a>
       {% if user.occupation == "military" %}
-        <span>Ваші психологи</span>
-      {% endif %}
-      <button class="profile-button">
-        <img src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="профіль">
-      </button>
+      <a href="/psychologists" style="text-decoration: none; color: inherit;">Ваші психологи</a>
+    {% endif %}
+    
+      <a href="{{ url_for('profile', username=current_user.username) }}">
+        <img class="avatar-small" style="cursor: pointer;" src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="Аватар">
+      </a>
     </nav>
     
   </header>
@@ -222,35 +260,32 @@
       <div class="avatar-large"></div>
       <div class="bio-block">
         <strong>{{ user.username }}</strong>
-      
+    
         {% if user.occupation == "psychologist" or user.occupation == "volunteer" %}
-          <strong>Прізвище та Ім'я:</strong> {{ user.surname }} {{ user.surname }}<br>
-          <strong></strong>
-          <strong>Телефон:</strong> {{ user.number }}<br>
-          <strong></strong>
+          <strong>Прізвище та Ім'я:</strong> {{ user.surname }} {{ user.name }}<br>
+          <strong>Телефон:</strong> {{ user.number | default('+.. ..........', true) }}<br>
           <strong>Email:</strong> {{ user.email }}<br>
         {% endif %}
-        <strong></strong>
-        <strong>Біографія:</strong><p>{{ user.bio }}</p>
-      
+    
+        <strong>Біографія:</strong>
+        <p>{{ user.bio | default('', true) }}</p>
+
+    
+        {% if user.username == current_user.username %}
         <div class="profile-buttons">
           <button onclick="window.location.href='/settings'">Налаштування</button>
           <button onclick="window.location.href='/main'">Домашня сторінка</button>
           <button class="profile-button logout" onclick="window.location.href='/logout'">Вийти</button>
         </div>
-      </div>
-      
-    </div>
-
-    <div class="section">
-      {% if user.occupation == "military" %}
-        <h3>Мої психологи:</h3>
-        <img src="https://images.unsplash.com/photo-1611042553484-75f3e75b5e2b?auto=format&fit=crop&w=500&q=80" alt="психолог">
+      {% else %}
+        <div class="profile-buttons">
+          <button onclick="window.location.href='/main'">Домашня сторінка</button>
+        </div>
       {% endif %}
+      </div>
     </div>
 
     <div class="section">
-      <h3>Нещодавно відвідані події:</h3>
       <div class="recent-events">
         {% for event in user.recent_events %}
           <div class="event-card">
@@ -261,22 +296,21 @@
     </div>
   </main>
   {% if user.occupation == "psychologist" and current_user.occupation == "military" and user.username != session["user"] %}
+  <div class="rating-section">
     <h3>Оцінка:</h3>
     <form method="POST" action="{{ url_for('view_psychologist', username=user.username) }}">
-        <div id="stars" style="font-size: 24px; margin-bottom: 10px;">
+        <div id="stars" class="stars-container">
             {% for i in range(1, 6) %}
                 <span class="star" data-value="{{ i }}">&#9734;</span>
             {% endfor %}
         </div>
         <input type="hidden" name="rating" id="rating-value" value="0">
-        <button type="submit">Надіслати оцінку</button>
+        <button type="submit" class="submit-rating">Надіслати оцінку</button>
     </form>
-  {% endif %}
+  </div>
+{% endif %}
   <footer>
     <strong>Beyond Duty</strong><br>
-    Напишіть відгук<br><br>
-    <input type="text" placeholder="Ваш відгук...">
-    <button class="button">Надіслати</button>
   </footer>
 
 </body>

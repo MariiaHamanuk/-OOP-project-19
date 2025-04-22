@@ -1,7 +1,7 @@
 '''back-end'''
 import re
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
@@ -10,7 +10,7 @@ from authlib.integrations.flask_client import OAuth
 app = Flask(__name__)
 app.secret_key = "very_secure123"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Olalaiamfine5162@localhost:5432/base'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:very_secure321@localhost:5432/base'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = False
 db = SQLAlchemy(app)
@@ -69,7 +69,6 @@ error_message="Authentication failed. Please log in again."))
         return render_template('login.html', error_message="No account with this username")
     session['user'] = user.username
     return redirect(url_for('main'))
-#oauth
 class Users(db.Model):
     '''Users table'''
     id = db.Column(db.Integer, primary_key=True)
@@ -114,8 +113,7 @@ surname, bio, age, password, verified=True, rating=None, answered=False):
         self.surname = surname
         self.bio = bio
         self.age = age
-        self.password = password #add hashing
-        self.verified = verified
+        self.password = password
 
         self.rating = rating
 
@@ -167,7 +165,7 @@ class Answer(db.Model):
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
-    restricted = ["/main", "/calendar", "/settings", "/nnairequestio", "/logout"]
+    restricted = ["/main", "/calendar", "/settings", "/questionnaire", "/logout"]
     if (request.path in restricted or re.match(r"^/profile/[^/]+$", request.path)) \
        and "user" not in session:
         return redirect(url_for("start"))
@@ -199,14 +197,13 @@ def main():
     all_psychologists = Users.query.filter_by(occupation="psychologist").all() 
     psychologistlist = sorted(all_psychologists, key=lambda p: reputations.get(p.id, 0),
     reverse=True)
-    topp  = []
+    top  = []
     for i in range(3):
         if len(psychologistlist) > i:
             topp.append(psychologistlist[i])
     user = Users.query.filter_by(username=session['user']).first()
-    top = rated_top()
 
-    return render_template("main.html", occupation=user.occupation, top=top, user=user, topp=topp)
+    return render_template("main.html", occupation=user.occupation, user=user, top=top)
 
 @app.route("/calendar")
 def calendar():
@@ -337,6 +334,10 @@ def validate_number(number):
     regex = r"^\+?[0-9]{10,15}$"
     return re.fullmatch(regex, number) is not None
 
+def email_exists(email):
+    '''checks if email already exists'''
+    return Users.query.filter_by(email=email).first() is not None
+
 @app.route("/save", methods=["POST"])
 def save_user():
     '''saves user to file'''
@@ -354,6 +355,9 @@ def save_user():
         return render_template(page, error_message="Invalid username")
 
     email = request.form["email"]
+
+    if email_exists(email):
+        return render_template(page, error_message="Email is already taken")
 
     if not validate_email(email):
         return render_template(page, error_message="Invalid email format")
@@ -736,24 +740,65 @@ def update_info():
 
     username = request.form.get("username")
     bio = request.form.get("bio")
-    age = request.form.get("age")
     email = request.form.get("email")
     number = request.form.get("number")
     new_password = request.form.get("new_password")
 
     message = "Неправильний пароль"
+    good = True
 
     if user.password == request.form["password"]:
-        user.username = username if username else user.username
-        user.bio = bio if bio else user.bio
-        user.age = age if age else user.age
-        user.email = email if email else user.email
-        user.number = number if number else user.number
-        user.password = new_password if new_password else user.password
-        db.session.commit()
+        if username:
+            if not validate_name(username):
+                message="Invalid username"
+                good = False
+        
+        if email:
+            if email_exists(email):
+                message="Email is already taken"
+                good = False
+        
+            if not validate_email(email):
+                message="Invalid email format"
+                good = False
+        
+        if new_password:
+            if not validate_password_1(new_password):
+                message= "Invalid password format: Minimum 8 and maximum 20 characters"
+                good = False
+            if not validate_password_2(new_password):
+                message= "Invalid password format: Minimum 1 digit"
+                good = False
 
-        session["user"] = user.username
-        message = "Дані успішно оновлено"
+            if not validate_password_3(new_password):
+                message= "Invalid password format: Minimum 1 Big letter"
+                good = False
+
+            if not validate_password_4(new_password):
+                message = "Invalid password format: Minimum 1 small letter"
+                good = False
+
+        if bio:
+            if not re.fullmatch(r'^.{1,500}$', bio):
+                message= "Invalid bio must be between 1 - 300 symbols"
+                goos = False
+        
+        if number:
+            number = re.sub(r"[^0-9]", "", number)
+            if not validate_number(number):
+                message="Invalid number"
+                good = False
+
+        if good:
+            user.username = username if username else user.username
+            user.bio = bio if bio else user.bio
+            user.email = email if email else user.email
+            user.number = number if number else user.number
+            user.password = new_password if new_password else user.password
+            db.session.commit()
+
+            session["user"] = user.username
+            message = "Дані успішно оновлено"
 
     return redirect(url_for('settings', message=message))
 
@@ -770,16 +815,6 @@ def delete_account():
 
     return redirect(url_for('settings', message="Неправильний пароль"))
 
-#add autodeletion for events
-#decomposition
-#rating system
-
-#email mailing
-#hashing passwords
-
-#regex
-#oauth
-#questions
 
 if __name__ == "__main__":
     create_tables()

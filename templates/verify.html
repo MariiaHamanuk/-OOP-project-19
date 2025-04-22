@@ -1,38 +1,137 @@
 <!DOCTYPE html>
-<html>
-    <a href="{{ url_for('main') }}">
-        <button> << </button>
-    </a>
-    <br>
-    <form action="{{ url_for('verify_manual') }}" method="POST">
-        <label for="username"> Username </label>
-        <br>
-        <input type="text" id="user" name="user">
-        <br>
-        <label for="email"> Event id</label>
-        <br>
-        <input type="text" id="event" name="event">
-        <br>
-        <button>submit</button>
-    </form>
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Ручна верифікація | Beyond Duty</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fff;
+      color: #0A1D4E;
+      padding: 40px 60px;
+    }
 
+    a.back-button {
+      display: inline-block;
+      background-color: #6ddbd4;
+      color: #0A1D4E;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 30px;
+    }
+
+    form {
+      background-color: #c3cdea;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      margin-bottom: 40px;
+    }
+
+    form label {
+      font-weight: 600;
+      display: block;
+      margin-top: 10px;
+    }
+
+    form input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    form button {
+      background-color: #6ddbd4;
+      color: #0A1D4E;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      margin-top: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    form button:hover {
+      background-color: #9aeae4;
+    }
+
+    .message {
+      margin-top: 20px;
+      color: #ff6b61;
+      font-weight: 600;
+    }
+
+    .results {
+      margin-top: 40px;
+    }
+
+    .results h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .results a {
+      display: inline-block;
+      margin-bottom: 5px;
+      text-decoration: none;
+      color: #243a76;
+      font-weight: 600;
+    }
+
+    .event-block {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      background-color: #f0f4fc;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="{{ url_for('main') }}" class="back-button">← Назад</a>
+
+  <form action="{{ url_for('verify_manual') }}" method="POST">
+    <label for="user">Ім’я користувача</label>
+    <input type="text" id="user" name="user">
+
+    <label for="event">ID події</label>
+    <input type="text" id="event" name="event">
+
+    <button type="submit">Верифікувати</button>
+  </form>
+
+  {% if message %}
+    <div class="message">{{ message }}</div>
+  {% endif %}
+
+  <div class="results">
     {% if users %}
-        {% for user in users %}
-            <a href="{{ url_for('profile', username=user.username) }}">
-                {{ user.username }}
-            </a>
-        {% endfor %}
-    {% endif %}
-    <p> --- </p>
-    {% if events %}
-        {% for event in events %}
-            {{ "id: {} | title: {}".format(event.id, event.title) }}
-            <br>
-            {{ "description: {}".format(event.description) }}
-        {% endfor %}
+      <h3>Знайдені користувачі:</h3>
+      {% for user in users %}
+        <a href="{{ url_for('profile', username=user.username) }}">{{ user.username }}</a><br>
+      {% endfor %}
     {% endif %}
 
+    {% if events %}
+      <h3>Знайдені події:</h3>
+      {% for event in events %}
+        <div class="event-block">
+          <div><strong>ID:</strong> {{ event.id }}</div>
+          <div><strong>Назва:</strong> {{ event.title }}</div>
+          <div><strong>Опис:</strong> {{ event.description }}</div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+</body>
 </html>

@@ -58,6 +58,9 @@
       align-items: center;
       padding: 15px 30px;
     }
+    a {
+      text-decoration: none;
+    }
 
     .back-btn {
       width: 40px;
@@ -101,8 +104,10 @@
 </head>
 <body>
   <header class="top-bar">
-    <button class="back-btn" onclick="history.back()">&#8592;</button>
-    <div class="header-title">
+    <a href="{{ url_for('profile', username=user.username) }}">
+      <button class="back-btn">&#8592;</button>
+    </a>
+        <div class="header-title">
       <div class="circle"></div>
       <h1>НАЛАШТУВАННЯ</h1>
     </div>

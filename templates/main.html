@@ -127,14 +127,6 @@
       font-weight: bold;
     }
 
-    .upcoming-events {
-      padding: 0 40px 40px;
-    }
-
-    .upcoming-events h2 {
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
 
     .event-list {
       display: flex;
@@ -167,29 +159,54 @@
       margin-bottom: 20px;
     }
 
-    .feedback-form {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .feedback-form input[type="text"] {
-      padding: 10px 20px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      outline: none;
-      min-width: 200px;
-    }
-
-    .feedback-form button {
-      padding: 10px 20px;
-      border-radius: 20px;
+    .top-button {
+      background-color: #243a76;
+      color: white;
       border: none;
-      background: linear-gradient(to right, #70d1cf, #51c1d2);
-      color: #243a76;
+      border-radius: 20px;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 35px;
+      margin-left: 35px;
     }
+
+    .top-button:hover {
+      background-color: #3c63ce;
+    }
+    .psychologist-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .psychologist-list li {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .psychologist-list li:hover {
+      background-color: #e2f1f8;
+    }
+
+    .psychologist-list a {
+      text-decoration: none;
+      color: #243a76;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .psychologist-list a:hover {
+      text-decoration: underline;
+      color: #3c63ce;
+    }
+
 </style>
 </head>
 <body>
@@ -201,7 +218,6 @@
     </div>
     <nav class="nav-links">
       <a href="/calendar">Календар подій</a>
-      <a href="#">Про проєкт</a>
       <a href="{{ url_for('profile', username=user.username) }}">
         <img class="avatar-small" style="cursor: pointer;" src="https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg" alt="Аватар">
       </a>
@@ -219,35 +235,30 @@
     <section class="top-psychologists">
       <h2>Топ наших психологів:</h2>
       <div class="psychologist-list" id="psychologists-list">
-        {% for p in topp %}
+        {% for p in top %}
           <li>
               <a href="{{ url_for('profile', username=p.username) }}">
-                  {{ "{}. {} rating: {}".format(loop.index, p.name, p.rating) }}
+                  {{ "{}. {} {} rating: {}".format(loop.index, p.name, p.surname, p.rating) }}
               </a>
           </li>
         {% endfor %}
       </div>
     </section>
     <a href="{{ url_for('psychologist_list') }}">
-      <button> психологи за вашими вподобаннями </button>
-  </a>
-    <section class="upcoming-events">
-      <h2>найближчі події:</h2>
+      <button class="top-button"> список психологів за результатом опитування </button>
+    </a>    
+
       <div class="event-list" id="events-list"></div>
     </section>
     {% if occupation == "admin" %}
         <a href="{{ url_for('verify_page') }}">
-            <button> Верифікація користувачів і подій </button>
+            <button class="top-button"> Верифікація користувачів і подій </button>
         </a>
     {% endif %}
   </main>
 
   <footer>
     <h2><strong>Beyond Duty</strong></h2>
-    <p>Напишіть відгук</p>
-    <div class="feedback-form">
-      <input type="text" placeholder="Ваш відгук...">
-      <button>Надіслати</button>
     </div>
   </footer>
 
