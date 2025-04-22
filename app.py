@@ -1,11 +1,10 @@
 '''back-end'''
 import re
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session
+from collections import defaultdict
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
-from collections import defaultdict
-from flask import jsonify
 # from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -13,6 +12,7 @@ app.secret_key = "very_secure123"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Olalaiamfine5162@localhost:5432/base'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_COOKIE_SECURE'] = False
 db = SQLAlchemy(app)
 #oauth
 oauth = OAuth(app)
@@ -31,21 +31,35 @@ google = oauth.register(
     api_base_url='https://www.googleapis.com/oauth2/v1/',
     userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'}
-)
+    client_kwargs={'scope': 'openid email profile'})
 
 
 @app.route('/login/google')
 def google_login():
+    '''
+    Oauth
+    '''
     redirect_uri = url_for('google_auth', _external=True)
     return google.authorize_redirect(redirect_uri)
 # треба прописати помилку, якщо не має акаунту
 @app.route('/auth/google')
 def google_auth():
+    '''
+    OAuth
+    '''
     try:
         token = google.authorize_access_token()
+        if not token:
+            return redirect(url_for('error', \
+error_message="Пробачте ви надто багато маніпулювали з входом через гугл"))
     except Exception as e:
         print("Помилка", e)
+    token = session.get("token") or google.token
+
+    if not token:
+        return redirect(url_for("login", \
+error_message="Authentication failed. Please log in again."))
+
     user_info = google.get('userinfo').json()
     email = user_info['email']
     username = user_info.get('name', email.split('@')[0])
@@ -80,8 +94,10 @@ class Users(db.Model):
     reviews_count = db.Column(db.Integer, default=0)
 
     # зв'язок з рейтингами
-    given_ratings = db.relationship("Rating", foreign_keys='Rating.rater_id', backref="rater", lazy=True)
-    received_ratings = db.relationship("Rating", foreign_keys='Rating.rated_id', backref="rated", lazy=True)
+    given_ratings = db.relationship("Rating", foreign_keys='Rating.rater_id',\
+ backref="rater", lazy=True)
+    received_ratings = db.relationship("Rating", foreign_keys='Rating.rated_id', \
+backref="rated", lazy=True)
 
     events = db.relationship('Events', back_populates='user', lazy=True)
 
@@ -133,12 +149,21 @@ class Events(db.Model):
         self.accepted = accepted
 
 class Answer(db.Model):
+    '''
+    class for user questionarre answers
+    '''
     id = db.Column(db.Integer, primary_key=True)
     question_number = db.Column(db.Integer)
     answer_text = db.Column(db.Text, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('Users', back_populates='answers')
+    def __init__(self, id, question_number, answer_text, user_id, user):
+        self.id = id
+        self.question_number = question_number
+        self.answer_text = answer_text
+        self.user_id = user_id
+        self.user = user
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
@@ -164,6 +189,7 @@ def start():
 @app.route("/logout")
 def logout_page():
     '''logout page'''
+    session.clear() 
     return render_template("logout.html")
 
 @app.route("/main")
@@ -171,12 +197,12 @@ def main():
     '''main page'''
     reputations = calculate_psychologist_reputation()
     all_psychologists = Users.query.filter_by(occupation="psychologist").all() 
-    psychologist_list = sorted(all_psychologists, key=lambda p: reputations.get(p.id, 0),
+    psychologistlist = sorted(all_psychologists, key=lambda p: reputations.get(p.id, 0),
     reverse=True)
     topp  = []
     for i in range(3):
-        if len(psychologist_list) > i:
-            topp.append(psychologist_list[i])
+        if len(psychologistlist) > i:
+            topp.append(psychologistlist[i])
     user = Users.query.filter_by(username=session['user']).first()
     top = rated_top()
 
@@ -345,7 +371,7 @@ def save_user():
     name = request.form.get("name")
     if name:
         if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', name):
-                return render_template(page, error_message="Invalid name must be between 1-30")
+            return render_template(page, error_message="Invalid name must be between 1-30")
     surname = request.form.get("surname")
     if surname:
         if not re.fullmatch(r'^[А-ЩЬЮЯЄІЇа-щьюяєіїA-Za-z]{1,30}$', surname):
@@ -417,6 +443,9 @@ def update_user_rating(user_id):
         db.session.commit()
 @app.route("/psychologists")
 def psychologist_list():
+    '''
+    returns mathed psychologissts
+    '''
     current_user = Users.query.filter_by(username=session["user"]).first()
     if current_user.occupation == "volunteer":
         return render_template("error.html", error_message="Лише для військових")
@@ -436,14 +465,17 @@ def psychologist_list():
             unmatched_psychologists.append(p)
 
     reputations = calculate_psychologist_reputation()
-    psychologist_list = sorted(matched_psychologists, key=lambda p: reputations.get(p.id, 0),
+    psychologistlist = sorted(matched_psychologists, key=lambda p: reputations.get(p.id, 0),
     reverse=True)
     if not matched_psychologists:
         return render_template("error.html", error_message="Поки що не знайшли підходящого психолога для Вас.")
-    return render_template("psychologists.html", psychologists=psychologist_list)
+    return render_template("psychologists.html", psychologists=psychologistlist)
 
 @app.route("/questionnaire", methods=["GET", "POST"])
 def questions():
+    '''
+    renders question.html
+    '''
     user = Users.query.filter_by(username=session['user']).first()
     return render_template("questions.html", user=user)
 
@@ -464,7 +496,7 @@ def submit_questionnaire():
     if not user:
         return jsonify({"status": "error", "message": "Користувача не знайдено"}), 404
     lst = []
-    for idx, (question_key, response) in enumerate(answers.items(), start=1):
+    for idx, (_, response) in enumerate(answers.items(), start=1):
         existing_answer = Answer.query.filter_by(user_id=user_id, question_number=idx).first()
 
         if existing_answer:
@@ -509,13 +541,24 @@ def create_tables():
         db.create_all()
 
 class Rating(db.Model):
+    '''
+    Rating class for psychologists rating
+    '''
     id = db.Column(db.Integer, primary_key=True)
     rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     score = db.Column(db.Float, nullable=False)
 
+    def __init__(self, id, rater_id, rated_id, score):
+        self.id = id
+        self.rater_id = rater_id
+        self.rated_id = rated_id
+        self.score = score
 
 def calculate_psychologist_reputation():
+    '''
+    calculates psychologists reputation
+    '''
     ratings = Rating.query.all()
     scores = defaultdict(lambda: [0, 0])  # rated_id: [total_weighted, total_weight]
 
@@ -527,13 +570,15 @@ def calculate_psychologist_reputation():
     reputations = {}
     for pid, (total, weight) in scores.items():
         reputations[pid] = round(total / weight, 2) if weight > 0 else 0.0
-
     return reputations
 
 @app.route("/psychologist/<username>", methods=["GET", "POST"])
 def view_psychologist(username):
+    '''
+    psychologists based on your preferences
+    '''
     profile_user = Users.query.filter_by(username=username).first()  # психолог
-    current_user = Users.query.filter_by(username=session['user']).first()  # військовий
+    current_user = Users.query.filter_by(username=session['user']).first()
 
     if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
         score = float(request.form["rating"])
