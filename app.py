@@ -162,6 +162,21 @@ class Answer(db.Model):
         self.answer_text = answer_text
         self.user_id = user_id
         self.user = user
+
+class Rating(db.Model):
+    '''
+    Rating class for psychologists rating
+    '''
+    id = db.Column(db.Integer, primary_key=True)
+    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    score = db.Column(db.Float, nullable=False)
+
+    def __init__(self, id, rater_id, rated_id, score):
+        self.id = id
+        self.rater_id = rater_id
+        self.rated_id = rated_id
+        self.score = score
 @app.before_request
 def restricted_pages():
     '''redirects unauthorized users'''
@@ -200,7 +215,7 @@ def main():
     top  = []
     for i in range(3):
         if len(psychologistlist) > i:
-            topp.append(psychologistlist[i])
+            top.append(psychologistlist[i])
     user = Users.query.filter_by(username=session['user']).first()
 
     return render_template("main.html", occupation=user.occupation, user=user, top=top)
@@ -290,7 +305,7 @@ def validate_user():
             session["user"] = username
             return redirect(url_for("main"))
 
-        
+
         return redirect(url_for("login", error_message="Wait for the verification"))
 
     return redirect(url_for("login", error_message="Wrong password"))
@@ -364,7 +379,8 @@ def save_user():
 
     password = request.form["password"]
     if not validate_password_1(password):
-        return render_template(page, error_message="Invalid password format: Minimum 8 and maximum 20 characters")
+        return render_template(page, \
+error_message="Invalid password format: Minimum 8 and maximum 20 characters")
     if not validate_password_2(password):
         return render_template(page, error_message="Invalid password format: Minimum 1 digit")
     if not validate_password_3(password):
@@ -544,20 +560,7 @@ def create_tables():
     with app.app_context():
         db.create_all()
 
-class Rating(db.Model):
-    '''
-    Rating class for psychologists rating
-    '''
-    id = db.Column(db.Integer, primary_key=True)
-    rater_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    rated_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    score = db.Column(db.Float, nullable=False)
 
-    def __init__(self, id, rater_id, rated_id, score):
-        self.id = id
-        self.rater_id = rater_id
-        self.rated_id = rated_id
-        self.score = score
 
 def calculate_psychologist_reputation():
     '''
