@@ -130,8 +130,8 @@ class Events(db.Model):
     time = db.Column(db.String(10), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    # needed for the algorithm 
-    reviews_count = db.Column(db.Integer, default=0) 
+    # needed for the algorithm
+    reviews_count = db.Column(db.Integer, default=0)
 
     user = db.relationship('Users', back_populates='events')
 
@@ -202,14 +202,14 @@ def start():
 @app.route("/logout")
 def logout_page():
     '''logout page'''
-    session.clear() 
+    session.clear()
     return render_template("logout.html")
 
 @app.route("/main")
 def main():
     '''main page'''
     reputations = calculate_psychologist_reputation()
-    all_psychologists = Users.query.filter_by(occupation="psychologist").all() 
+    all_psychologists = Users.query.filter_by(occupation="psychologist").all()
     psychologistlist = sorted(all_psychologists, key=lambda p: reputations.get(p.id, 0),
     reverse=True)
     top  = []
@@ -230,15 +230,18 @@ def calendar():
 
 @app.route('/profile/<username>', methods=["GET", "POST"])
 def profile(username):
+    '''profile page'''
     profile_user = Users.query.filter_by(username=username).first()
     current_user = Users.query.filter_by(username=session["user"]).first()
 
     if not profile_user:
         return render_template("error.html", error_message="No user with this username")
 
-    if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
+    if request.method == "POST" and \
+current_user.occupation == "military" and profile_user.occupation == "psychologist":
         score = float(request.form["rating"])
-        existing = Rating.query.filter_by(rater_id=current_user.id, rated_id=profile_user.id).first()
+        existing = Rating.query.filter_by(rater_id=current_user.id, \
+rated_id=profile_user.id).first()
 
         if existing:
             existing.score = score
@@ -386,7 +389,8 @@ error_message="Invalid password format: Minimum 8 and maximum 20 characters")
     if not validate_password_3(password):
         return render_template(page, error_message="Invalid password format: Minimum 1 Big letter")
     if not validate_password_4(password):
-        return render_template(page, error_message="Invalid password format: Minimum 1 small letter")
+        return render_template(page, \
+error_message="Invalid password format: Minimum 1 small letter")
 
     name = request.form.get("name")
     if name:
@@ -401,7 +405,8 @@ error_message="Invalid password format: Minimum 8 and maximum 20 characters")
     if bio:
         if not re.fullmatch(r'^.{1,500}$', bio):
             if occupation != 'military':
-                return render_template(page, error_message="Invalid bio must be between 1 - 300 symbols")
+                return render_template(page, \
+error_message="Invalid bio must be between 1 - 300 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number"))\
 if request.form.get("number") else None
     age = request.form.get("age")
@@ -413,10 +418,12 @@ if request.form.get("number") else None
     match occupation:
 
         case 'military':
-            user = Users(occupation, username, email, number, name, surname, bio, age, password, True)
+            user = Users(occupation, username, email, number, \
+name, surname, bio, age, password, True)
             page = "m_register"
         case "psychologist":
-            user = Users(occupation, username, email, number, name, surname, bio, age, password,False,0.0)
+            user = Users(occupation, username, email, number, \
+name, surname, bio, age, password,False,0.0)
             page = "ps_register"
         case "volunteer":
             user = Users(occupation, username, email, number, name, surname, bio, password, False)
@@ -432,6 +439,7 @@ if request.form.get("number") else None
     return redirect(url_for(page, error_message="Account with this username already exists"))
 
 def calculate_influence_scores():
+    '''calculates influence score'''
     ratings = Rating.query.all()
     user_influence = defaultdict(int)
 
@@ -461,6 +469,7 @@ def update_user_rating(user_id):
     if user:
         user.rating = final_score
         db.session.commit()
+
 @app.route("/psychologists")
 def psychologist_list():
     '''
@@ -474,7 +483,7 @@ def psychologist_list():
         all_psychologists = Users.query.filter_by(occupation="psychologist").all()
     matched_psychologists = []
     unmatched_psychologists = []
-    
+
     for p in all_psychologists:
         with db.session.no_autoflush:
             p_answers = {a.question_number: a.answer_text for a in p.answers}
@@ -488,7 +497,8 @@ def psychologist_list():
     psychologistlist = sorted(matched_psychologists, key=lambda p: reputations.get(p.id, 0),
     reverse=True)
     if not matched_psychologists:
-        return render_template("error.html", error_message="Поки що не знайшли підходящого психолога для Вас.")
+        return render_template("error.html", \
+error_message="Поки що не знайшли підходящого психолога для Вас.")
     return render_template("psychologists.html", psychologists=psychologistlist)
 
 @app.route("/questionnaire", methods=["GET", "POST"])
@@ -501,6 +511,7 @@ def questions():
 
 @app.route('/submit-questionnaire', methods=['POST'])
 def submit_questionnaire():
+    '''writes answers to db'''
     user = Users.query.filter_by(username=session['user']).first()
     data = request.get_json()
     print(data)
@@ -522,7 +533,6 @@ def submit_questionnaire():
         if existing_answer:
             existing_answer.answer_text = response
             lst.append(response)
-            # user.answers[idx] = response
         else:
             lst.append(response)
 
@@ -532,7 +542,6 @@ def submit_questionnaire():
                 user_id=user_id
             )
             db.session.add(new_answer)
-    # user.answers = lst
     user.answered = True
     db.session.commit()
 
@@ -587,10 +596,12 @@ def view_psychologist(username):
     profile_user = Users.query.filter_by(username=username).first()  # психолог
     current_user = Users.query.filter_by(username=session['user']).first()
 
-    if request.method == "POST" and current_user.occupation == "military" and profile_user.occupation == "psychologist":
+    if request.method == "POST" and current_user.occupation == "military" \
+and profile_user.occupation == "psychologist":
         score = float(request.form["rating"])
 
-        existing = Rating.query.filter_by(rater_id=current_user.id, rated_id=profile_user.id).first()
+        existing = Rating.query.filter_by(rater_id=current_user.id, \
+rated_id=profile_user.id).first()
         if existing:
             existing.score = score
         else:
@@ -755,16 +766,16 @@ def update_info():
             if not validate_name(username):
                 message="Invalid username"
                 good = False
-        
+
         if email:
             if email_exists(email):
                 message="Email is already taken"
                 good = False
-        
+
             if not validate_email(email):
                 message="Invalid email format"
                 good = False
-        
+
         if new_password:
             if not validate_password_1(new_password):
                 message= "Invalid password format: Minimum 8 and maximum 20 characters"
@@ -784,8 +795,8 @@ def update_info():
         if bio:
             if not re.fullmatch(r'^.{1,500}$', bio):
                 message= "Invalid bio must be between 1 - 300 symbols"
-                goos = False
-        
+                good = False
+
         if number:
             number = re.sub(r"[^0-9]", "", number)
             if not validate_number(number):
