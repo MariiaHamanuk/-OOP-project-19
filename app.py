@@ -10,7 +10,7 @@ from authlib.integrations.flask_client import OAuth
 app = Flask(__name__)
 app.secret_key = "very_secure123"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Olalaiamfine5162@localhost:5432/base'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:very_secure321@localhost:5432/base'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = False
 db = SQLAlchemy(app)
