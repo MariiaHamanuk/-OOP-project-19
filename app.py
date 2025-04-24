@@ -75,7 +75,6 @@ class Users(db.Model):
     occupation = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.Text, unique=True, nullable=False)
-    age = db.Column(db.Integer)
     password = db.Column(db.Text, nullable=False)
 
     number = db.Column(db.Text, unique=True)
@@ -83,7 +82,6 @@ class Users(db.Model):
     surname = db.Column(db.String(50))
     bio = db.Column(db.Text)
     verified = db.Column(db.Boolean)
-    age = db.Column(db.Integer)
 
     answers = db.relationship('Answer', back_populates='user', lazy=True)
     answered = db.Column(db.Boolean)
@@ -101,20 +99,18 @@ backref="rated", lazy=True)
     events = db.relationship('Events', back_populates='user', lazy=True)
 
     def __init__(self, occupation, username, email, number, name, \
-surname, bio, age, password, verified=True, rating=None, answered=False):
+surname, bio, password, verified=True, rating=None, answered=False):
         '''for positional arguments'''
         self.occupation = occupation
         self.username = username
         self.email = email
-        self.age = age
 
         self.number = number
         self.name = name
         self.surname = surname
         self.bio = bio
-        self.age = age
         self.password = password
-
+        self.verified= verified
         self.rating = rating
 
         self.answered = answered
@@ -209,7 +205,7 @@ def logout_page():
 def main():
     '''main page'''
     reputations = calculate_psychologist_reputation()
-    all_psychologists = Users.query.filter_by(occupation="psychologist").all()
+    all_psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
     psychologistlist = sorted(all_psychologists, key=lambda p: reputations.get(p.id, 0),
     reverse=True)
     top  = []
@@ -406,27 +402,21 @@ error_message="Invalid password format: Minimum 1 small letter")
         if not re.fullmatch(r'^.{1,500}$', bio):
             if occupation != 'military':
                 return render_template(page, \
-error_message="Invalid bio must be between 1 - 300 symbols")
+error_message="Invalid bio must be between 1 - 500 symbols")
     number = re.sub(r"[^0-9]", "", request.form.get("number"))\
 if request.form.get("number") else None
-    age = request.form.get("age")
-    if age:
-        if not isinstance(age, int):
-            if int(age) > 150 or int(age) < 5:
-                return render_template(page, error_message="Invalid age, you mast be older than 5")
 
     match occupation:
-
         case 'military':
             user = Users(occupation, username, email, number, \
-name, surname, bio, age, password, True)
+name, surname, bio, password, True, None, False)
             page = "m_register"
         case "psychologist":
             user = Users(occupation, username, email, number, \
-name, surname, bio, age, password,False,0.0)
+name, surname, bio, password,False, 0.0, False)
             page = "ps_register"
         case "volunteer":
-            user = Users(occupation, username, email, number, name, surname, bio, password, False)
+            user = Users(occupation, username, email, number, name, surname, bio, password, False, None, False)
             page = "v_register"
 
     if not used(username):
@@ -480,7 +470,7 @@ def psychologist_list():
         return render_template("error.html", error_message="Лише для військових")
     user_answers = {a.question_number: a.answer_text for a in current_user.answers}
     with db.session.no_autoflush:
-        all_psychologists = Users.query.filter_by(occupation="psychologist").all()
+        all_psychologists = Users.query.filter_by(occupation="psychologist", verified=True).all()
     matched_psychologists = []
     unmatched_psychologists = []
 

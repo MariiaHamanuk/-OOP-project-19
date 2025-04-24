@@ -204,13 +204,12 @@
             </div>
             <form action="/save" method="POST">
                 <input type="hidden" id="occupation" name="occupation" value="volunteer">
+                <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="text" id="name" name="name" placeholder="Ваше ім'я" required>
                 <input type="text" id="surname" name="surname" placeholder="Ваше прізвище" required>
-                <input type="text" id="age" name="age" placeholder="Ваш вік" required>
-                <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="Ваш email" required>
                 <textarea id="bio" name="bio" placeholder="Розкажіть про ваш волонтерський досвід" maxlength="500" required></textarea>
-                <p id="char-count">0 / 300</p>
+                <p id="char-count">0 / 500</p>
                 <div style="position: relative; width: 50%;">
                     <input type="password" id="password" name="password" placeholder="Пароль" required
                         style="width: 100%; padding-right: 10px; margin-left: -20px;">
@@ -261,7 +260,7 @@
         }
         const bio = document.getElementById("bio");
 const counter = document.getElementById("char-count");
-const maxLength = 300;
+const maxLength = 500;
 
 function updateCounter() {
     const length = bio.value.length;

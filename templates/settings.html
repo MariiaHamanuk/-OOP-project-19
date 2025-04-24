@@ -161,11 +161,11 @@
       <input type="email" id="email" name="email" placeholder="{{ user.email }}"><br>
 
       <label for="number">Номер телефону:</label><br>
-      <input type="text" id="number" name="number" placeholder="{{ user.number }}"><br>
+      <input type="text" id="number" name="number" placeholder="{{ user.number if user.number else '' }}"><br>
 
       <label for="bio">Опис (біо):</label><br>
-      <textarea id="bio" name="bio" rows="4" placeholder="{{ user.bio }}" maxlength="500"></textarea><br>
-      <p id="char-count">0 / 300</p>
+      <textarea id="bio" name="bio" rows="4" placeholder="{{ user.bio if user.bio else '' }}" maxlength="500"></textarea><br>
+      <p id="char-count">0 / 500</p>
 
       <label for="password">Поточний пароль:</label><br>
       <input type="password" id="password" name="password" placeholder="*обов'язково"required><br>
@@ -193,7 +193,7 @@
     <script>
       const bio = document.getElementById("bio");
       const counter = document.getElementById("char-count");
-      const maxLength = 300;
+      const maxLength = 500;
       
       function updateCounter() {
           const length = bio.value.length;

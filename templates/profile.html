@@ -263,12 +263,16 @@
     
         {% if user.occupation == "psychologist" or user.occupation == "volunteer" %}
           <strong>Прізвище та Ім'я:</strong> {{ user.surname }} {{ user.name }}<br>
-          <strong>Телефон:</strong> {{ user.number | default('+.. ..........', true) }}<br>
+          {% if user.number %}
+            <strong>Телефон:</strong> {{ user.number }}<br>
+          {% endif %}
           <strong>Email:</strong> {{ user.email }}<br>
         {% endif %}
-    
-        <strong>Біографія:</strong>
-        <p>{{ user.bio | default('', true) }}</p>
+
+        {% if user.bio %}
+          <strong>Біографія:</strong>
+          <p>{{ user.bio }}</p>
+        {% endif %}
 
     
         {% if user.username == current_user.username %}
