@@ -5,7 +5,9 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
-# from werkzeug.security import generate_password_hash, check_password_hash
+
+from regex import validate_name, validate_email, validate_password_1, validate_password_2, validate_password_3, validate_password_4, validate_number
+
 
 app = Flask(__name__)
 app.secret_key = "very_secure123"
@@ -69,6 +71,7 @@ error_message="Authentication failed. Please log in again."))
         return render_template('login.html', error_message="No account with this username")
     session['user'] = user.username
     return redirect(url_for('main'))
+
 class Users(db.Model):
     '''Users table'''
     id = db.Column(db.Integer, primary_key=True)
@@ -308,45 +311,6 @@ def validate_user():
         return redirect(url_for("login", error_message="Wait for the verification"))
 
     return redirect(url_for("login", error_message="Wrong password"))
-
-def validate_name(name):
-    ''' complitad regex for username min. 3 char and max. 30, special
-    characters can be allowed, if all characters are only special 
-    characters it should return false'''
-    if not name:
-        return None
-    regex = "^[A-Za-z0-9]{1,30}$"
-    return re.fullmatch(regex, name) is not None
-
-def validate_email(email):
-    '''regex for email'''
-    regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-    return re.fullmatch(regex, email) is not None
-
-def validate_password_1(password):
-    '''Minimum eight and maximum 10 characters, at least one
-    uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = r"^.{8,20}$"
-    return re.fullmatch(regex, password) is not None
-def validate_password_2(password):
-    '''Minimum eight and maximum 10 characters, at least one
-    uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = r"^(?=.*\d).+$"
-    return re.fullmatch(regex, password) is not None
-def validate_password_3(password):
-    '''Minimum eight and maximum 10 characters, at least one
-    uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = r"^(?=.*[A-Z]).+$"
-    return re.fullmatch(regex, password) is not None
-def validate_password_4(password):
-    '''Minimum eight and maximum 10 characters, at least one
-    uppercase letter, one lowercase letter, one number and one special character:'''
-    regex = r"^[a-zA-Z0-9]+$"
-    return re.fullmatch(regex, password) is not None
-def validate_number(number):
-    '''must be checked '''
-    regex = r"^\+?[0-9]{10,15}$"
-    return re.fullmatch(regex, number) is not None
 
 def email_exists(email):
     '''checks if email already exists'''
