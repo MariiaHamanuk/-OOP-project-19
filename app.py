@@ -11,7 +11,7 @@ from regex import validate_name, validate_email, validate_password_1, validate_p
 
 app = Flask(__name__)
 app.secret_key = "very_secure123"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://super:Olalaiamfine5162@Mariia-4513.postgres.pythonanywhere-services.com:14513/Mariia$base'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://super:Olalaiamfine5162@Mariia-4513.postgres.pythonanywhere-services.com:14513/base'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_SECURE'] = False
 db = SQLAlchemy(app)
