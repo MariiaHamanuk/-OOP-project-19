@@ -304,10 +304,10 @@ def validate_user():
         return redirect(url_for("login", error_message="No account with this username"))
 
     if user.password == password:
-        if user.verified or user.occupation != "psychologist":
+        if user.verified:
             session.permanent = True
             session["user"] = username
-            if user.occupation != "volunteer":
+            if user.occupation == "psychologist":
                 if not session.get("not_first_login"):
                     session["not_first_login"] = True
                     return redirect(url_for("questions"))
