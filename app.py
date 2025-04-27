@@ -307,9 +307,10 @@ def validate_user():
         if user.verified or user.occupation != "psychologist":
             session.permanent = True
             session["user"] = username
-            if not session.get("not_first_login"):
-                session["not_first_login"] = True
-                return redirect(url_for("questions"))
+            if user.occupation != "volunteer":
+                if not session.get("not_first_login"):
+                    session["not_first_login"] = True
+                    return redirect(url_for("questions"))
             return redirect(url_for("main"))
 
 
@@ -385,7 +386,8 @@ name, surname, bio, password, True, None, False)
 name, surname, bio, password,False, 0.0, False)
             page = "ps_register"
         case "volunteer":
-            user = Users(occupation, username, email, number, name, surname, bio, password, False, None, False)
+            user = Users(occupation, username, email, number, \
+name, surname, bio, password, False, None, False)
             page = "v_register"
 
     if not used(username):
@@ -393,7 +395,7 @@ name, surname, bio, password,False, 0.0, False)
         if occupation == "psychologist":
             return redirect(url_for("waiting_page"))
         session["user"] = username
-        return redirect(url_for("main"))
+        return redirect(url_for("main")) if occupation == "volunteer" else redirect(url_for("questions"))
 
     return redirect(url_for(page, error_message="Account with this username already exists"))
 
