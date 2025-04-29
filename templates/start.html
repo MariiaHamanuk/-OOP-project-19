@@ -108,8 +108,8 @@
         .button:hover {
             background-color: #4b9391;
         }
-                @media (max-width: 768px) {
-            .landing-container {
+        @media (max-width: 768px) {
+            .container {
                 flex-direction: column;
             }
 
@@ -118,16 +118,56 @@
                 flex-direction: row;
                 flex-wrap: wrap;
                 justify-content: center;
+                padding: 10px;
             }
 
             .sidebar img {
-                width: 40%;
+                width: 45%;
                 max-width: 140px;
+                margin: 5px;
             }
 
             .content {
                 width: 100%;
-                padding: 20px;
+                padding: 5% 3%;
+            }
+
+            .title {
+                font-size: 2rem;
+                margin-top: 10px;
+            }
+
+            .text {
+                font-size: 1rem;
+                max-width: 95%;
+            }
+
+            .button {
+                width: 95%;
+                font-size: 1rem;
+                padding: 12px;
+            }
+        }
+
+        /* Додаткові налаштування для дуже маленьких екранів */
+        @media (max-width: 480px) {
+            .sidebar img {
+                width: 45%;
+                max-width: 120px;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .text {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+
+            .button {
+                padding: 10px;
+                margin: 8px 0;
             }
         }
     </style>
