@@ -108,6 +108,28 @@
         .button:hover {
             background-color: #4b9391;
         }
+                @media (max-width: 768px) {
+            .landing-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .sidebar img {
+                width: 40%;
+                max-width: 140px;
+            }
+
+            .content {
+                width: 100%;
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
