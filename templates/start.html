@@ -34,7 +34,13 @@
             font-family: Arial, sans-serif;
             background-color: #f8f8f8;
         }
-
+        /* new from here */
+        .container {
+            display: flex;
+            flex-direction: row; /* За замовчуванням горизонтальне розташування */
+            min-height: 100vh;
+            width: 100%;
+        }
         .sidebar {
             width: 25%; /* Трохи збільшив ширину бокової панелі */
             background-color: #1d2c5b;
@@ -108,11 +114,14 @@
         .button:hover {
             background-color: #4b9391;
         }
-        @media (max-width: 768px) {
+
+        @media only screen and (max-width: 768px) {
+            /* Змінюємо напрямок контейнера на вертикальний */
             .container {
                 flex-direction: column;
             }
 
+            /* Змінюємо ширину бокової панелі на 100% */
             .sidebar {
                 width: 100%;
                 flex-direction: row;
@@ -121,81 +130,97 @@
                 padding: 10px;
             }
 
+            /* Змінюємо розмір зображень для мобільних пристроїв */
             .sidebar img {
                 width: 45%;
                 max-width: 140px;
                 margin: 5px;
             }
 
+            /* Змінюємо ширину контенту на 100% */
             .content {
                 width: 100%;
-                padding: 5% 3%;
+                padding: 20px 15px;
             }
 
+            /* Зменшуємо розмір заголовка */
             .title {
                 font-size: 2rem;
-                margin-top: 10px;
+                margin: 15px 0;
             }
 
+            /* Зменшуємо розмір тексту */
             .text {
                 font-size: 1rem;
-                max-width: 95%;
+                max-width: 100%;
             }
 
+            /* Збільшуємо ширину кнопок */
             .button {
-                width: 95%;
+                width: 100%;
                 font-size: 1rem;
                 padding: 12px;
+                margin: 8px 0;
             }
         }
 
         /* Додаткові налаштування для дуже маленьких екранів */
-        @media (max-width: 480px) {
+        @media only screen and (max-width: 480px) {
+            /* Змінюємо розмір і розташування зображень */
             .sidebar img {
-                width: 45%;
+                width: 48%;
                 max-width: 120px;
+                margin: 3px;
             }
 
+            /* Зменшуємо розмір заголовка */
             .title {
                 font-size: 1.8rem;
             }
 
+            /* Зменшуємо розмір тексту */
             .text {
                 font-size: 0.95rem;
                 line-height: 1.6;
             }
 
+            /* Зменшуємо розмір кнопок */
             .button {
                 padding: 10px;
-                margin: 8px 0;
+                margin: 6px 0;
             }
         }
+
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <img src="https://kyiv24.news/wp-content/uploads/2024/07/depositphotos_583682600-stock-photo-close-female-soldier-showing-heart.jpg" alt="Soldier 1">
-        <img src="https://ukr.radio/images/news/big/news_1730895675_672b5f3b2c1fc.jpg" alt="Soldier 2">
-        <img src="https://visitukraine.today/media/blog/previews/9bMGFk6hcgF2g7DLB2uel0aNUuRiskr3YDzpCGeM.webp" alt="Soldier 3">
-        <img src="https://spacemag.com.ua/wp-content/uploads/2024/03/photo_2022-10-01_13-10-10.jpg" alt="Soldier 4">
-    </div>
-
-    <div class="content">
-        <div class="title">
-            <span></span> BEYOND DUTY
+    <div class="container">
+        <div class="sidebar">
+            <img src="https://kyiv24.news/wp-content/uploads/2024/07/depositphotos_583682600-stock-photo-close-female-soldier-showing-heart.jpg" alt="Soldier 1">
+            <img src="https://ukr.radio/images/news/big/news_1730895675_672b5f3b2c1fc.jpg" alt="Soldier 2">
+            <img src="https://visitukraine.today/media/blog/previews/9bMGFk6hcgF2g7DLB2uel0aNUuRiskr3YDzpCGeM.webp" alt="Soldier 3">
+            <img src="https://spacemag.com.ua/wp-content/uploads/2024/03/photo_2022-10-01_13-10-10.jpg" alt="Soldier 4">
         </div>
-        <p class="text">
-            <strong>Beyond Duty</strong> – це онлайн-платформа, яка допомагає військовим інтегруватися в цивільне життя через систему менторства. 
-            Наш сервіс працює як платформа знайомств, де кожен військовий може знайти собі ментора – психолога або людину з досвідом роботи з ветеранами, 
-            який допоможе йому зробити перші кроки до нормального життя.
-        </p>
-        <!-- <button class="button">Я військовий</button>
-        <button class="button">Я психолог</button>
-        <button class="button">Я хочу додати подію</button> -->
-        <a href="{{ url_for('m_register') }}" class="button" onclick="setOccupation('military')">Я військовий</a>
-        <a href="{{ url_for('ps_register') }}" class="button" onclick="setOccupation('psychologist')">Я психолог</a>
-        <a href="{{ url_for('v_register') }}" class="button" onclick="setOccupation('volunteer')">Я хочу додати подію</a>                     
+
+
+        <div class="content">
+            <div class="title">
+                <span></span> BEYOND DUTY
+            </div>
+            <p class="text">
+                <strong>Beyond Duty</strong> – це онлайн-платформа, яка допомагає військовим інтегруватися в цивільне життя через систему менторства. 
+                Наш сервіс працює як платформа знайомств, де кожен військовий може знайти собі ментора – психолога або людину з досвідом роботи з ветеранами, 
+                який допоможе йому зробити перші кроки до нормального життя.
+            </p>
+            <!-- <button class="button">Я військовий</button>
+            <button class="button">Я психолог</button>
+            <button class="button">Я хочу додати подію</button> -->
+            <a href="{{ url_for('m_register') }}" class="button" onclick="setOccupation('military')">Я військовий</a>
+            <a href="{{ url_for('ps_register') }}" class="button" onclick="setOccupation('psychologist')">Я психолог</a>
+            <a href="{{ url_for('v_register') }}" class="button" onclick="setOccupation('volunteer')">Я хочу додати подію</a>   
+            
+        </div>                  
     </div>
     <script>
         function setOccupation(role) {
