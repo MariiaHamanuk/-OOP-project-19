@@ -14,13 +14,14 @@
             margin: 0;
             background-color: #222;
         }
-
         .container {
             display: flex;
             width: 100vw;
             height: 100vh;
             background: white;
+            overflow: hidden;
         }
+
         .left {
             background: #1e3a78;
             width: 20%;
@@ -30,6 +31,7 @@
             position: relative;
             padding: 20px;
             overflow: visible;
+            box-sizing: border-box;
         }
 
         .left img {
@@ -39,6 +41,7 @@
             height: auto;
             border-radius: 10px;
         }
+
         .right {
             width: 60%;
             display: flex;
@@ -46,7 +49,9 @@
             justify-content: center;
             padding: 40px;
             padding-top: 0px;
+            box-sizing: border-box;
         }
+        
         h3 {
             text-align: center;
             color: #6ec6c4;
@@ -55,12 +60,14 @@
             margin-top: -48px;
             margin-left: 400px;
         }
+        
         form {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             margin-top: 20px;
         }
+        
         input {
             width: 50%;
             padding: 10px;
@@ -68,6 +75,7 @@
             border: 1px solid #6ec6c4;
             border-radius: 15px;
         }
+        
         .login-button {
             width: 20%;
             background: #6ec6c4;
@@ -81,9 +89,11 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        
         .login-button:hover {
             background: #4b9391;
         }
+        
         .toggle-container {
             display: flex;
             position: relative;
@@ -92,9 +102,11 @@
             margin-top: 0px;
             margin-left: 400px;
         }
+        
         .switch-input {
             display: none;
         }
+        
         .switch-label {
             padding: 7px 17px;
             background-color: #6ec6c4;
@@ -102,30 +114,36 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+        
         .switch-input:checked + .switch-label .left_sw {
             background-color: #6ec6c4;
             color: black;
             pointer-events: auto;
         }
+        
         .switch-input:checked + .switch-label .right_sw {
             background-color: #4b9391;
             color: white;
             pointer-events: none;
         }
+        
         .left_sw, .right_sw {
             display: inline-block;
             padding: 4px 20px;
             border-radius: 30px;
             transition: all 0.3s ease;
         }
+        
         .left_sw {
             background-color: #4b9391;
             color: white;
         }
+        
         .right_sw {
             background-color: #6ec6c4;
             color: rgb(0, 0, 0);
         }
+        
         .back-button {
             width: 20%;
             background: #a1a1a1;
@@ -140,13 +158,14 @@
         .back-button:hover {
             background: #646464;
         }
+        
         .error-message {
             color: red;
             font-size: 14px;
             margin-top: 20px;
             text-align: right;
-            /* padding-right: 190px; */
         }
+        
         .show-password-checkbox {
             position: absolute;
             top: 18%;
@@ -161,6 +180,108 @@
             border-color: #6ec6c4;
         }
 
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+                display: block;
+            }
+
+            .container {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .left {
+                width: 100%;
+                height: 200px;
+                position: relative;
+                padding: 0;
+            }
+            
+            .left img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+
+            .right {
+                width: 100%;
+                padding: 20px;
+                align-items: center;
+            }
+
+            h3 {
+                margin: 20px 0;
+                text-align: center;
+                margin-left: 0;
+            }
+
+            .toggle-container {
+                margin-left: 0;
+                margin-bottom: 20px;
+            }
+
+            form {
+                align-items: center;
+                width: 100%;
+            }
+
+            input {
+                width: 80%;
+            }
+
+            form div[style] {
+                width: 80% !important;
+            }
+            
+            form div[style] input[type="password"],
+            form div[style] input[type="text"] {
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+            .show-password-checkbox {
+                top: 50%;
+                right: 15px;
+                transform: translateY(-50%);
+            }
+
+            .login-button, .back-button {
+                width: 80%;
+                padding: 12px;
+            }
+
+            .error-message {
+                text-align: center;
+                width: 80%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .left {
+                height: 150px;
+            }
+
+            h3 {
+                font-size: 20px;
+                margin: 15px 0;
+            }
+
+            .left_sw, .right_sw {
+                padding: 4px 10px;
+                font-size: 14px;
+            }
+            
+
+            input, form div[style], .login-button, .back-button {
+                width: 90%;
+            }
+        }
     </style>
 </head>
 <body>
