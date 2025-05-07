@@ -166,32 +166,19 @@
             text-align: right;
         }
         
+        .show-password-checkbox {
+            position: absolute;
+            top: 18%;
+            right: 60px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
 
-.password-wrapper {
-    position: relative;
-    width: 100%;
-    margin: 10px 0;
-}
-
-.password-wrapper input[type="password"],
-.password-wrapper input[type="text"] {
-    width: 100%;
-    padding: 10px 40px 10px 10px;
-    border: 1px solid #6ec6c4;
-    border-radius: 15px;
-    box-sizing: border-box;
-}
-
-.show-password-checkbox {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    z-index: 2;
-}
+        .show-password-checkbox:checked {
+            background-color: #6ec6c4;
+            border-color: #6ec6c4;
+        }
 
         @media (max-width: 768px) {
             body {
@@ -258,6 +245,11 @@
                 width: 100% !important;
                 margin-left: 0 !important;
             }
+            .show-password-checkbox {
+                top: 50%;
+                right: 15px;
+                transform: translateY(-50%);
+            }
 
             .login-button, .back-button {
                 width: 80%;
@@ -290,6 +282,7 @@
                 width: 90%;
             }
         }
+        
     </style>
 </head>
 <body>
@@ -310,10 +303,10 @@
                 <input type="hidden" id="occupation" name="occupation" value="military">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
-                <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Пароль" required>
-                    <input type="checkbox" id="show-password" class="show-password-checkbox">
-                </div>
+
+                <input type="password" id="password" name="password" placeholder="password" required style="position: relative;">
+                <input type="checkbox" id="show-password" class="show-password-checkbox" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px; background: none; border: none; cursor: pointer; font-size: 16px; color: #6ec6c4; margin-top: -20px;">
+
                 {% if error_message %}
                     <p class="error-message">{{ error_message }}</p>
                 {% endif %}
