@@ -14,6 +14,30 @@
             margin: 0;
             background-color: #222;
         }
+        .password-wrapper {
+            position: relative;
+            width: 50%;
+            margin: 10px 0;
+        }
+        
+        .password-wrapper input[type="password"],
+        .password-wrapper input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #6ec6c4;
+            border-radius: 15px;
+            box-sizing: border-box;
+        }
+        
+        .show-password-checkbox {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
         .container {
             display: flex;
             width: 100vw;
@@ -303,9 +327,8 @@
                 <input type="hidden" id="occupation" name="occupation" value="military">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
-                <div style="position: relative; width: 50%;">
-                    <input type="password" id="password" name="password" placeholder="Пароль" required
-                        style="width: 100%; padding-right: 10px; margin-left: -20px;">
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="Пароль" required>
                     <input type="checkbox" id="show-password" class="show-password-checkbox">
                 </div>
                 {% if error_message %}
