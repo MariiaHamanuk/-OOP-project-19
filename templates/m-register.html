@@ -168,17 +168,18 @@
         
         .show-password-checkbox {
             position: absolute;
-            top: 18%;
-            right: 60px;
+            top: 50%;
+            right: 26%;
+            transform: translateY(-50%);
             cursor: pointer;
             width: 16px;
             height: 16px;
         }
-
+/* 
         .show-password-checkbox:checked {
             background-color: #6ec6c4;
             border-color: #6ec6c4;
-        }
+        } */
 
         @media (max-width: 768px) {
             body {
@@ -245,12 +246,6 @@
                 width: 100% !important;
                 margin-left: 0 !important;
             }
-            .show-password-checkbox {
-                top: 50%;
-                right: 15px;
-                transform: translateY(-50%);
-            }
-
             .login-button, .back-button {
                 width: 80%;
                 padding: 12px;
@@ -303,8 +298,9 @@
                 <input type="hidden" id="occupation" name="occupation" value="military">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
-                <input type="password" id="password" name="password" placeholder="password" required style="width: 100%;">
+              
                 <div style="position: relative; width: 50%;">
+                    <input type="password" id="password" name="password" placeholder="password" required>
                     <input type="checkbox" id="show-password" class="show-password-checkbox" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; width: 16px; height: 16px;">
                 </div>
 
