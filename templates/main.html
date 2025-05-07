@@ -16,31 +16,34 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 40px;
+      padding: 15px 20px;
       background-color: #fff;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 800;
       color: #243a76;
     }
 
     .logo .dot {
-      width: 30px;
-      height: 30px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background-color: #6ddbd4;
-      margin-right: 10px;
+      margin-right: 8px;
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 30px;
+      gap: 15px;
     }
 
     .nav-links a {
@@ -50,8 +53,8 @@
     }
 
     .avatar-small {
-      width: 35px;
-      height: 35px;
+      width: 32px;
+      height: 32px;
       background-color: #ccc;
       border-radius: 50%;
     }
@@ -60,14 +63,14 @@
       position: relative;
       text-align: center;
       overflow: hidden;
+      height: 250px;
     }
 
     .hero-section img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center bottom;
-      clip-path: inset(0 0 2cm 0);
+      object-position: center;
       opacity: 0.6;
     }
 
@@ -79,39 +82,48 @@
       background-color: #6ddbd4;
       color: #243a76;
       border: none;
-      padding: 15px 200px; /* Зроблено кнопку ширшою */
+      padding: 15px 40px;
       font-size: 16px;
-      font-weight: bold; /* Текст став жирнішим */
+      font-weight: bold;
       border-radius: 30px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      width: 80%;
+      max-width: 300px;
     }
+    
     .survey-btn:hover {
       background-color: #9aeae4;
     }
 
     .top-psychologists {
-      padding: 40px;
+      padding: 25px 15px;
     }
 
     .top-psychologists h2 {
       font-size: 18px;
       margin-bottom: 20px;
+      text-align: center;
     }
 
     .psychologist-list {
       display: flex;
-      gap: 30px;
+      gap: 15px;
       flex-wrap: wrap;
+      justify-content: center;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
     }
 
     .psychologist-card {
-      width: 180px;
+      width: 140px;
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       text-align: center;
       cursor: pointer;
+      margin-bottom: 15px;
     }
 
     .psychologist-card img {
@@ -122,29 +134,72 @@
 
     .psychologist-card span {
       display: block;
-      padding: 10px;
+      padding: 8px;
       background-color: #f1f1f1;
       font-weight: bold;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
+    .psychologist-list li {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      width: 100%;
+    }
+
+    .psychologist-list li:hover {
+      background-color: #e2f1f8;
+    }
+
+    .psychologist-list a {
+      text-decoration: none;
+      color: #243a76;
+      font-weight: bold;
+      font-size: 14px;
+      display: block;
+      width: 100%;
+    }
+
+    .psychologist-list a:hover {
+      text-decoration: underline;
+      color: #3c63ce;
+    }
 
     .event-list {
       display: flex;
-      gap: 30px;
+      flex-direction: column;
+      gap: 15px;
+      padding: 0 15px 25px;
     }
 
     .event-card {
-      flex: 1;
-      min-width: 200px;
-      height: 150px;
+      width: 100%;
+      min-height: 120px;
       background-color: #ffffff;
       border-radius: 10px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    .event-card h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    .event-card p {
+      font-size: 14px;
     }
 
     footer {
       background-color: #243a76;
-      padding: 40px;
+      padding: 25px 15px;
       text-align: center;
       color: white;
     }
@@ -164,50 +219,92 @@
       color: white;
       border: none;
       border-radius: 20px;
-      padding: 10px 20px;
+      padding: 10px 15px;
       text-align: center;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      margin-bottom: 35px;
-      margin-left: 35px;
+      margin-bottom: 25px;
+      margin-left: 15px;
+      width: calc(100% - 30px);
+      max-width: 400px;
+      display: block;
     }
 
     .top-button:hover {
       background-color: #3c63ce;
     }
-    .psychologist-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
+
+    /* Медіа-запити для адаптивності */
+    @media screen and (max-width: 768px) {
+      .main-header {
+        padding: 10px 15px;
+      }
+
+      .logo {
+        font-size: 18px;
+      }
+
+      .logo .dot {
+        width: 20px;
+        height: 20px;
+      }
+
+      .nav-links {
+        gap: 10px;
+      }
+
+      .nav-links a {
+        font-size: 12px;
+      }
+
+      .hero-section {
+        height: 200px;
+      }
+
+      .top-psychologists {
+        padding: 20px 10px;
+      }
+
+      .psychologist-card {
+        width: calc(50% - 10px);
+        margin-bottom: 10px;
+      }
     }
 
-    .psychologist-list li {
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      padding: 12px 20px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
+    @media screen and (max-width: 480px) {
+      .logo span {
+        font-size: 16px;
+      }
 
-    .psychologist-list li:hover {
-      background-color: #e2f1f8;
-    }
+      .nav-links a:not(:last-child) {
+        display: none;
+      }
 
-    .psychologist-list a {
-      text-decoration: none;
-      color: #243a76;
-      font-weight: bold;
-      font-size: 16px;
-    }
+      .hero-section {
+        height: 180px;
+      }
 
-    .psychologist-list a:hover {
-      text-decoration: underline;
-      color: #3c63ce;
-    }
+      .survey-btn {
+        padding: 12px 25px;
+        font-size: 14px;
+      }
 
-</style>
+      .top-psychologists h2 {
+        font-size: 16px;
+      }
+
+      .psychologist-card span {
+        font-size: 12px;
+        padding: 6px;
+      }
+
+      .top-button {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+    }
+  </style>
 </head>
 <body>
 
