@@ -216,7 +216,22 @@
       .poll-header a {
         text-decoration: none;
       }
-
+    @media (max-width: 600px) {
+      .poll-header {
+        flex-direction: column;
+        font-size: 1.2em;
+        text-align: center;
+      }
+    
+      .poll-footer {
+        flex-direction: column;
+        gap: 10px;
+      }
+    
+      .btn, .submit-btn {
+        width: 100%;
+      }
+    }
     </style>
   </head>
   <body>
