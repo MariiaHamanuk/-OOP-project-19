@@ -13,22 +13,7 @@
             height: 100vh;
             margin: 0;
             background-color: #222;
-        }і
-        .password-wrapper {
-            position: relative;
-            width: 50%;
-            margin: 10px 0;
         }
-        
-        .password-wrapper input[type="password"],
-        .password-wrapper input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #6ec6c4;
-            border-radius: 15px;
-            box-sizing: border-box;
-        }
-        
         .container {
             display: flex;
             width: 100vw;
@@ -181,20 +166,32 @@
             text-align: right;
         }
         
-        .show-password-checkbox {
-            position: absolute;
-            top: 50%;
-            right: 5%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
-        }
 
-        .show-password-checkbox:checked {
-            background-color: #6ec6c4;
-            border-color: #6ec6c4;
-        }
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    width: 100%;
+    padding: 10px 40px 10px 10px;
+    border: 1px solid #6ec6c4;
+    border-radius: 15px;
+    box-sizing: border-box;
+}
+
+.show-password-checkbox {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    z-index: 2;
+}
 
         @media (max-width: 768px) {
             body {
