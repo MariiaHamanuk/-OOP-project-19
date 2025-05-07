@@ -314,10 +314,12 @@
                 <input type="hidden" id="occupation" name="occupation" value="military">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
-
-                <div class="password-container" id ="password-container">
+                <div class="password-container">
                     <input type="password" id="password" name="password" placeholder="password" required>
-                    <input type="checkbox" id="show-password" class="show-password-checkbox">
+                    <label for="show-password" class="show-password-toggle">
+                        <input type="checkbox" id="show-password" class="show-password-checkbox">
+                        👁
+                    </label>
                 </div>
 
                 {% if error_message %}
