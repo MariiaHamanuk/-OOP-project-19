@@ -171,26 +171,29 @@
             border-color: #6ec6c4;
         }
         .password-container {
-            
-            position: relative;
-            width: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 80%;
+            margin: 10px 0;
         }
 
-        .password-container input[type="password"] {
-            width: 60%;
-            padding-right: 40px;
+        .password-container input[type="password"],
+        .password-container input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #6ec6c4;
+            border-radius: 15px;
+            margin-right: 10px;
+            box-sizing: border-box;
         }
 
         .show-password-checkbox {
-            position: absolute;
-            top: 50%;
-            right: 5%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
-            margin: 0;
-}
+            cursor: pointer;    
+            width: 20px;
+            height: 20px;
+            margin-left: auto;
+        }
         @media (max-width: 768px) {
             body {
                 height: auto;
@@ -270,6 +273,16 @@
             .error-message {
                 text-align: center;
                 width: 80%;
+            }
+            .password-container {
+                width: 80%;
+                flex-direction: row;
+            }
+
+            .password-container input[type="password"],
+            .password-container input[type="text"] {
+                width: 100%;
+                margin-right: 10px;
             }
         }
 
