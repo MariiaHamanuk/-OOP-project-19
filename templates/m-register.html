@@ -14,33 +14,6 @@
             margin: 0;
             background-color: #222;
         }
-        .input-wrapper {
-            display: flex;
-            align-items: center;
-            border: 1px solid #99c;
-            border-radius: 12px;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            background-color: white;
-          }
-
-          .input-wrapper input {
-            border: none;
-            outline: none;
-            flex: 1;
-            font-size: 16px;
-            background: transparent;
-          }
-        
-          .input-wrapper.password {
-            background-color: #e8f0fe;
-          }
-        
-          .toggle-password {
-            cursor: pointer;
-            width: 20px;
-            height: 20px;
-          }
         .container {
             display: flex;
             width: 100vw;
@@ -330,8 +303,10 @@
                 <input type="hidden" id="occupation" name="occupation" value="military">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
-                <input type="password" id="password" name="password" placeholder="Пароль" required>
-                <input type="checkbox" id="show-password" class="show-password-checkbox">
+                <div style="position: relative; width: 50%;">
+                    <input type="password" id="password" name="password" placeholder="Пароль" required
+                        style="width: 100%; padding-right: 10px; margin-left: -20px;">
+                    <input type="checkbox" id="show-password" class="show-password-checkbox">
                 </div>
                 {% if error_message %}
                     <p class="error-message">{{ error_message }}</p>
