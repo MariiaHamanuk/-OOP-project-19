@@ -5,334 +5,346 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>military sign up</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #222;
-        }
+        .left {
+        background: #1e3a78;
+        width: 20%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 20px;
+        overflow: visible;
+        box-sizing: border-box;
+    }
+
+    .left img {
+        position: absolute;
+        right: -90%;
+        width: 160%;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .right {
+        width: 60%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 40px;
+        padding-top: 0px;
+        box-sizing: border-box;
+    }
+
+    h3 {
+        text-align: center;
+        color: #6ec6c4;
+        font-family: 'Courier New';
+        position: relative;
+        margin-top: -48px;
+        margin-left: auto; /* Змінено */
+        margin-right: auto; /* Додано */
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Змінено */
+        margin-top: 20px;
+        width: 60%; /* Додано для контролю ширини форми */
+        margin-left: auto; /* Додано */
+        margin-right: auto; /* Додано */
+    }
+
+    input {
+        width: 100%; /* Змінено */
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #6ec6c4;
+        border-radius: 15px;
+        box-sizing: border-box; /* Додано */
+    }
+
+    .login-button {
+        width: 60%; /* Змінено */
+        background: #6ec6c4;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        padding: 10px; /* Змінено */
+        border-radius: 20px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .login-button:hover {
+        background: #4b9391;
+    }
+
+    .toggle-container {
+        display: flex;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        margin-top: 0px;
+        margin-left: auto; /* Змінено */
+        margin-right: auto; /* Додано */
+        margin-bottom: 20px; /* Додано для відступу */
+    }
+
+    .switch-input {
+        display: none;
+    }
+
+    .switch-label {
+        padding: 7px 17px;
+        background-color: #6ec6c4;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .switch-input:checked + .switch-label .left_sw {
+        background-color: #6ec6c4;
+        color: black;
+        pointer-events: auto;
+    }
+
+    .switch-input:checked + .switch-label .right_sw {
+        background-color: #4b9391;
+        color: white;
+        pointer-events: none;
+    }
+
+    .left_sw, .right_sw {
+        display: inline-block;
+        padding: 4px 20px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .left_sw {
+        background-color: #4b9391;
+        color: white;
+    }
+
+    .right_sw {
+        background-color: #6ec6c4;
+        color: rgb(0, 0, 0);
+    }
+
+    .back-button {
+        width: 60%; /* Змінено */
+        background: #a1a1a1;
+        color: white;
+        border: none;
+        padding: 10px; /* Змінено */
+        border-radius: 20px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .back-button:hover {
+        background: #646464;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 10px; /* Змінено */
+        text-align: center; /* Змінено */
+        width: 60%; /* Додано */
+        margin-left: auto; /* Додано */
+        margin-right: auto; /* Додано */
+    }
+
+    .password-container {
+        position: relative;
+        width: 100%; /* Змінено */
+    }
+
+    .password-container input[type="password"],
+    .password-container input[type="text"] { /* Додано для text */
+        width: 100%; /* Змінено */
+        padding-right: 30px; /* Зменшено відступ справа */
+        box-sizing: border-box; /* Додано */
+    }
+
+    .show-password-checkbox {
+        position: absolute;
+        top: 50%;
+        right: 10px; /* Змінено позицію */
+        transform: translateY(-50%);
+        cursor: pointer;
+        width: 20px; /* Трохи збільшено */
+        height: 20px; /* Трохи збільшено */
+        margin: 0;
+    }
+
+    /* Стилізація мітки для чекбоксу (за бажанням) */
+    .show-password-label {
+        position: absolute;
+        top: 50%;
+        right: 35px; /* Коригування позиції відносно чекбоксу */
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 14px;
+        color: #555;
+    }
+
+@media (max-width: 768px) {
+
+body {
+
+height: auto;
+
+display: block;
+
+}
         .container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            background: white;
-            overflow: hidden;
+            flex-direction: column;
+            height: auto;
+            min-height: 100vh;
         }
 
         .left {
-            background: #1e3a78;
-            width: 20%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 100%;
+            height: 200px;
             position: relative;
-            padding: 20px;
-            overflow: visible;
-            box-sizing: border-box;
+            padding: 0;
         }
 
         .left img {
             position: absolute;
-            right: -90%;
-            width: 160%;
-            height: auto;
-            border-radius: 10px;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
+
 
         .right {
-            width: 60%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 40px;
-            padding-top: 0px;
-            box-sizing: border-box;
+            width: 100%;
+            padding: 20px;
+            align-items: center;
         }
-        
+
         h3 {
+            margin: 20px 0;
             text-align: center;
-            color: #6ec6c4;
-            font-family: 'Courier New';
-            position: relative;
-            margin-top: -48px;
-            margin-left: 400px;
+            margin-left: 0;
         }
-        
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            margin-top: 20px;
-        }
-        
-        input {
-            width: 50%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #6ec6c4;
-            border-radius: 15px;
-        }
-        
-        .login-button {
-            width: 20%;
-            background: #6ec6c4;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: none;
-            padding: 10px 70px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        .login-button:hover {
-            background: #4b9391;
-        }
-        
+
         .toggle-container {
-            display: flex;
-            position: relative;
-            justify-content: center;
+            margin-left: 0;
+            margin-bottom: 20px;
+        }
+
+        form {
             align-items: center;
-            margin-top: 0px;
-            margin-left: 400px;
-        }
-        
-        .switch-input {
-            display: none;
-        }
-        
-        .switch-label {
-            padding: 7px 17px;
-            background-color: #6ec6c4;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .switch-input:checked + .switch-label .left_sw {
-            background-color: #6ec6c4;
-            color: black;
-            pointer-events: auto;
-        }
-        
-        .switch-input:checked + .switch-label .right_sw {
-            background-color: #4b9391;
-            color: white;
-            pointer-events: none;
-        }
-        
-        .left_sw, .right_sw {
-            display: inline-block;
-            padding: 4px 20px;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-        }
-        
-        .left_sw {
-            background-color: #4b9391;
-            color: white;
-        }
-        
-        .right_sw {
-            background-color: #6ec6c4;
-            color: rgb(0, 0, 0);
-        }
-        
-        .back-button {
-            width: 20%;
-            background: #a1a1a1;
-            color: white;
-            border: none;
-            padding: 10px 70px;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 10px;
+            width: 80%;
         }
 
-        .back-button:hover {
-            background: #646464;
-        }
-        
-        .error-message {
-            color: red;
-            font-size: 14px;
-            margin-top: 20px;
-            text-align: right;
+        input {
+            width: 100%;
         }
 
-        .show-password-checkbox:checked {
-            background-color: #6ec6c4;
-            border-color: #6ec6c4;
+        form div[style] {
+            width: 80% !important;
+        }
+
+        form div[style] input[type="password"],
+        form div[style] input[type="text"] {
+            width: 100% !important;
+            margin-left: 0 !important;
         }
         .password-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 80%;
-            margin: 10px 0;
+            width: 100%;
         }
-
         .password-container input[type="password"],
         .password-container input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #6ec6c4;
-            border-radius: 15px;
-            margin-right: 10px;
-            box-sizing: border-box;
+            width: 100%;
+            padding-right: 40px;
         }
-
         .show-password-checkbox {
-            cursor: pointer;    
-            width: 20px;
-            height: 20px;
-            margin-left: auto;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
         }
-        @media (max-width: 768px) {
-            body {
-                height: auto;
-                display: block;
-            }
-
-            .container {
-                flex-direction: column;
-                height: auto;
-                min-height: 100vh;
-            }
-
-            .left {
-                width: 100%;
-                height: 200px;
-                position: relative;
-                padding: 0;
-            }
-            
-            .left img {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-            
-
-            .right {
-                width: 100%;
-                padding: 20px;
-                align-items: center;
-            }
-
-            h3 {
-                margin: 20px 0;
-                text-align: center;
-                margin-left: 0;
-            }
-
-            .toggle-container {
-                margin-left: 0;
-                margin-bottom: 20px;
-            }
-
-            form {
-                align-items: center;
-                width: 100%;
-            }
-
-            input {
-                width: 80%;
-            }
-
-            form div[style] {
-                width: 80% !important;
-            }
-            
-            form div[style] input[type="password"],
-            form div[style] input[type="text"] {
-                width: 100% !important;
-                margin-left: 0 !important;
-            }
-            .show-password-checkbox {
-                top: 50%;
-                right: 15px;
-                transform: translateY(-50%);
-            }
-
-            .login-button, .back-button {
-                width: 80%;
-                padding: 12px;
-            }
-
-            .error-message {
-                text-align: center;
-                width: 80%;
-            }
-            .password-container {
-                width: 80%;
-                flex-direction: row;
-            }
-
-            .password-container input[type="password"],
-            .password-container input[type="text"] {
-                width: 100%;
-                margin-right: 10px;
-            }
+        .show-password-label {
+            right: 40px;
         }
 
-        @media (max-width: 480px) {
-            .left {
-                height: 150px;
-            }
-
-            h3 {
-                font-size: 20px;
-                margin: 15px 0;
-            }
-
-            .left_sw, .right_sw {
-                padding: 4px 10px;
-                font-size: 14px;
-            }
-            
-
-            input, form div[style], .login-button, .back-button {
-                width: 90%;
-            }
+        .login-button, .back-button {
+            width: 80%;
+            padding: 12px;
         }
-        
+
+        .error-message {
+            text-align: center;
+            width: 80%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .left {
+            height: 150px;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin: 15px 0;
+        }
+
+        .left_sw, .right_sw {
+            padding: 4px 10px;
+            font-size: 14px;
+        }
+
+
+        input, form div[style], .login-button, .back-button {
+            width: 90%;
+        }
+        .password-container input[type="password"],
+        .password-container input[type="text"] {
+            padding-right: 50px;
+        }
+        .show-password-checkbox {
+            right: 10px;
+        }
+        .show-password-label {
+            right: 35px;
+        }
+    }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="left">
-            <img src="https://spacemag.com.ua/wp-content/uploads/2024/03/photo_2022-10-01_13-10-10.jpg" alt="Volunteer">
+            <img src="https://via.placeholder.com/300" alt="Зображення">
         </div>
         <div class="right">
-            <h3>beyond duty</h3>
+            <h3>Авторизація</h3>
             <div class="toggle-container">
-                <input type="checkbox" id="account-toggle" class="switch-input" checked>
+                <input type="checkbox" id="account-toggle" class="switch-input">
                 <label for="account-toggle" class="switch-label">
-                    <span class="left_sw">Я маю акаунт</span>
-                    <span class="right_sw">Я не маю акаунт</span>
+                    <span class="left_sw">Вхід</span>
+                    <span class="right_sw">Реєстрація</span>
                 </label>
             </div>
-            <form action="/save" method="POST">
-                <input type="hidden" id="occupation" name="occupation" value="military">
-                <input type="text" id="username" name="username" placeholder="username" required>
-                <input type="email" id="email" name="email" placeholder="email" required>
-
-                <div class="password-container">
-                    <input type="password" id="password" name="password" placeholder="password" required>
-                    <input type="checkbox" id="show-password" class="show-password-checkbox">
+            <form method="POST">
+                <div>
+                    <input type="text" name="username" placeholder="Ім'я користувача" required>
                 </div>
-
+                <div class="password-container">
+                    <input type="password" id="password" name="password" placeholder="Пароль" required>
+                    <input type="checkbox" id="show-password" class="show-password-checkbox">
+                    <label for="show-password" class="show-password-label">Показати</label>
+                </div>
+    
                 {% if error_message %}
                     <p class="error-message">{{ error_message }}</p>
                 {% endif %}
@@ -345,24 +357,24 @@
     </div>
     <script>
         localStorage.removeItem("accountToggleChecked");
-
+    
         const checkbox = document.getElementById("account-toggle");
         const leftSw = document.querySelector(".left_sw");
         const rightSw = document.querySelector(".right_sw");
-
+    
         window.addEventListener("DOMContentLoaded", function () {
             checkbox.checked = true;
             updateSwitchStyles();
         });
-
-
+    
+    
         checkbox.addEventListener("change", function () {
             localStorage.setItem("accountToggleChecked", this.checked);
             if (!this.checked) {
                 window.location.href = "/login";
             }
         });
-
+    
         function updateSwitchStyles() {
             if (checkbox.checked) {
                 leftSw.style.backgroundColor = "#6ec6c4";
@@ -377,11 +389,12 @@
             }
         }
         const passwordInput = document.getElementById("password");
-const showPasswordCheckbox = document.getElementById("show-password");
-
-showPasswordCheckbox.addEventListener("change", function () {
+    const showPasswordCheckbox = document.getElementById("show-password");
+    showPasswordCheckbox.addEventListener("change", function () {
+    
     passwordInput.type = this.checked ? "text" : "password";
-});
+    
+    });
     </script>
 </body>
 </html>
