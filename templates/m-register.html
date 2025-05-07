@@ -69,7 +69,7 @@
         }
         
         input {
-            width: 80%;
+            width: 60%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #6ec6c4;
@@ -166,42 +166,40 @@
             text-align: right;
         }
 
+        /* Виправлені стилі для поля пароля */
         .password-container {
             position: relative;
-            width: 80%;
+            width: 60%;
             margin: 10px 0;
         }
 
-        .password-container input[type="password"] {
+        .password-container input {
             width: 100%;
-            padding: 10px 40px 10px 10px; /* додатковий правий padding для кнопки */
-            border: 1px solid #6ec6c4;
-            border-radius: 15px;
-            box-sizing: border-box;
+            padding-right: 40px;
         }
 
-        .show-password-toggle {
+        .password-toggle {
             position: absolute;
             top: 50%;
             right: 10px;
             transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6ec6c4;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 24px;
-            width: 24px;
+            font-size: 16px;
+            padding: 0;
+            width: 30px;
+            height: 30px;
         }
 
-        .show-password-checkbox {
-            appearance: none;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            background: none;
-            border: none;
+        .password-toggle:hover {
+            color: #4b9391;
         }
-
+        
         @media (max-width: 768px) {
             body {
                 height: auto;
@@ -257,6 +255,10 @@
             input {
                 width: 80%;
             }
+            
+            .password-container {
+                width: 80%;
+            }
 
             form div[style] {
                 width: 80% !important;
@@ -288,8 +290,7 @@
                 font-size: 14px;
             }
             
-
-            input, form div[style], .login-button, .back-button {
+            input, .password-container, form div[style], .login-button, .back-button {
                 width: 90%;
             }
         }
@@ -314,12 +315,12 @@
                 <input type="hidden" id="occupation" name="occupation" value="military">
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
+
                 <div class="password-container">
                     <input type="password" id="password" name="password" placeholder="password" required>
-                    <label for="show-password" class="show-password-toggle">
-                        <input type="checkbox" id="show-password" class="show-password-checkbox">
-                        👁
-                    </label>
+                    <button type="button" class="password-toggle" id="password-toggle" aria-label="Показати/сховати пароль">
+                        👁️
+                    </button>
                 </div>
 
                 {% if error_message %}
@@ -365,12 +366,19 @@
                 rightSw.style.color = "black";
             }
         }
-        const passwordInput = document.getElementById("password");
-const showPasswordCheckbox = document.getElementById("show-password");
 
-showPasswordCheckbox.addEventListener("change", function () {
-    passwordInput.type = this.checked ? "text" : "password";
-});
+        const passwordInput = document.getElementById("password");
+        const passwordToggle = document.getElementById("password-toggle");
+
+        passwordToggle.addEventListener("click", function() {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                passwordToggle.textContent = "🔒";
+            } else {
+                passwordInput.type = "password";
+                passwordToggle.textContent = "👁️";
+            }
+        });
     </script>
 </body>
 </html>
