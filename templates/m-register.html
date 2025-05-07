@@ -292,6 +292,57 @@
                 width: 90%;
             }
         }
+        form input[type="text"],
+        form input[type="email"],
+        .password-container {
+            width: 50%;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        /* Стилі для контейнера пароля */
+        .password-container {
+            position: relative;
+            display: flex;
+        }
+
+        .password-container input[type="password"],
+        .password-container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            padding-right: 35px; /* Місце для чекбоксу */
+            border: 1px solid #6ec6c4;
+            border-radius: 15px;
+        }
+
+        /* Чекбокс всередині поля */
+        .show-password-checkbox {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        /* Адаптація для мобільних */
+        @media (max-width: 768px) {
+            form input[type="text"],
+            form input[type="email"],
+            .password-container {
+                width: 80% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            form input[type="text"],
+            form input[type="email"],
+            .password-container {
+                width: 90% !important;
+            }
+        }
         
     </style>
 </head>
@@ -314,10 +365,11 @@
                 <input type="text" id="username" name="username" placeholder="username" required>
                 <input type="email" id="email" name="email" placeholder="email" required>
 
-                <div class="password-container" id ="password-container">
+                <div class="password-container">
                     <input type="password" id="password" name="password" placeholder="password" required>
                     <input type="checkbox" id="show-password" class="show-password-checkbox">
                 </div>
+                
 
                 {% if error_message %}
                     <p class="error-message">{{ error_message }}</p>
