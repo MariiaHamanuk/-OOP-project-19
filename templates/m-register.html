@@ -69,7 +69,7 @@
         }
         
         input {
-            width: 80%;
+            width: 50%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #6ec6c4;
@@ -172,12 +172,17 @@
         }
         .password-container {
             position: relative;
-            width: 80%;
+            width: 60%;
+        }
+
+        #password-container {
+            position: relative;
+            width: 60%;
         }
 
         .show-password-checkbox {
             position: absolute;
-            top: 60%;
+            top: 50%;
             right: 10px;
             transform: translateY(-50%);
             cursor: pointer;
@@ -245,6 +250,17 @@
                 width: 80% !important;
             }
             
+            form div[style] input[type="password"],
+            form div[style] input[type="text"] {
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+            .show-password-checkbox {
+                top: 50%;
+                right: 15px;
+                transform: translateY(-50%);
+            }
+
             .login-button, .back-button {
                 width: 80%;
                 padding: 12px;
